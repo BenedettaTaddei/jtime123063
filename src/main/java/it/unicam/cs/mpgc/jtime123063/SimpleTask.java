@@ -2,15 +2,21 @@ package it.unicam.cs.mpgc.jtime123063;
 
 import java.time.LocalDate;
 import java.util.UUID;
+import java.util.Objects;
 
 public class SimpleTask implements Task {
+
     private final String id;
     private String title;
+    private Project parentProject;
     private double estimatedTime;
     private double effectiveTime;
     private boolean completed;
     private LocalDate scheduledDate;
 
+    /**
+     * Costruttore per nuovi task.
+     */
     public SimpleTask(String title, double estimatedTime) {
         if (title == null || title.trim().isEmpty()) {
             throw new IllegalArgumentException("Il titolo non può essere nullo o vuoto");
@@ -25,78 +31,77 @@ public class SimpleTask implements Task {
         this.effectiveTime = 0;
     }
 
-    @Override
-    public String getId() {
-        return this.id;
-    }
-
-    @Override
-    public String getTitle() {
-        return this.title;
-    }
-
-    //         !!VEDI!!
-    @Override
-    public void setTitle(String title) {
-        if (title == null || title.trim().isEmpty()) {
-            throw new IllegalArgumentException("Il titolo non può essere nullo o vuoto");
-        }
-        this.title= title;
-
-    }
-
-    @Override
-    public double getEstimatedTime() {
-        return this.estimatedTime;
-    }
-
-    //          !!VEDI!!
-    @Override
-    public void setEstimatedTime(double hours) {
-        if (hours < 0) {
-            throw new IllegalArgumentException("La stima del tempo non può essere negativa");
-        }
-        this.estimatedTime= hours;
-    }
-
-    @Override
-    public double getEffectiveTime() {
-        return effectiveTime;
-    }
-
-    //       !!VEDI!!
-    @Override
-    public void setEffectiveTime(double hours) {
-        if (hours < 0) {
-            throw new IllegalArgumentException("La durata effettiva di una Task non può essere negativa");
-        }
-        this.effectiveTime = hours;
-    }
-
-    @Override
-    public boolean isCompleted() {
-        return completed;
-    }
-
-    // SET COMPLETED = COMPLETED O = TRUE ????   !!VEDI!!
-    @Override
-    public void setCompleted(boolean completed) {
+    /**
+     * Costruttore usato dal Parser XML per ricostruire task esistenti.
+     */
+    public SimpleTask(String id, String title, double estimatedTime,
+                      double effectiveTime, boolean completed, LocalDate date) {
+        if (id == null || id.trim().isEmpty()) throw new IllegalArgumentException("ID nullo");
+        this.id = id;
+        this.title = title.trim();
+        this.estimatedTime = estimatedTime;
+        this.effectiveTime = effectiveTime;
         this.completed = completed;
-    }
-
-    @Override
-    public LocalDate getScheduledDate() {
-        return scheduledDate;
-    }
-
-    //              !!VEDI!!
-    @Override
-    public void setScheduledDate(LocalDate date) {
         this.scheduledDate = date;
     }
 
+    @Override public String getId() {
+        return this.id;
+    }
+    @Override public String getTitle() {
+        return this.title;
+    }
+    @Override public void setTitle(String title) {
+        this.title = title;
+    }
+    @Override public double getEstimatedTime() {
+        return this.estimatedTime;
+    }
+    @Override public void setEstimatedTime(double hours) {
+        this.estimatedTime = hours;
+    }
+    @Override public double getEffectiveTime() {
+        return effectiveTime;
+    }
+    @Override public void setEffectiveTime(double hours) {
+        this.effectiveTime = hours;
+    }
+    @Override public boolean isCompleted() {
+        return completed;
+    }
+    @Override public void setCompleted(boolean completed) {
+        this.completed = completed;
+    }
+    @Override public LocalDate getScheduledDate() {
+        return scheduledDate;
+    }
+    @Override public void setScheduledDate(LocalDate date) {
+        this.scheduledDate = date;
+    }
+    @Override public Project getParentProject() {
+        return this.parentProject;
+    }
+    @Override public void setParentProject(Project project) {
+        this.parentProject = project;
+    }
+
     @Override
-    public double getTimeVariance() {
-        return this.effectiveTime - this.estimatedTime;
+    public double getTimeVariance() { return this.effectiveTime - this.estimatedTime; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof SimpleTask)) return false;
+        SimpleTask that = (SimpleTask) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() { return Objects.hash(id); }
+
+    @Override
+    public String toString() {
+        String projectInfo = (parentProject != null) ? " [" + parentProject.getName() + "]" : " [Libero]";
+        return title + projectInfo + (completed ? " (Completato)" : "");
     }
 }

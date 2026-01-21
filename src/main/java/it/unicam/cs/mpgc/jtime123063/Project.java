@@ -80,4 +80,8 @@ public interface Project {
      * @return true se tutti i task sono completati, false se esiste almeno un task pendente
      */
     boolean canBeClosed();
+
+    double getTotalEstimatedTime();
+
+    double getTotalEffectiveTime();
 }

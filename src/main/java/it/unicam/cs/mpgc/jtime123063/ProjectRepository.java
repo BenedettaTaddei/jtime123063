@@ -1,24 +1,34 @@
 package it.unicam.cs.mpgc.jtime123063;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
- * Gestisce il salvataggio e il caricamento dei progetti su un supporto persistente.
+ * Gestisce la persistenza dei progetti.
+ * Segue lo stesso standard della TaskRepository per coerenza di sistema.
  */
 public interface ProjectRepository {
 
     /**
-     * Salva la lista completa dei progetti.
-     * * @param projects la lista di progetti da rendere persistente
-     * @throws IOException se si verifica un errore durante il salvataggio
+     * Salva o aggiorna un progetto.
+     * @param project il progetto da rendere persistente
      */
-    void saveAll(List<Project> projects);
+    void save(Project project);
 
     /**
-     * Carica tutti i progetti precedentemente salvati.
-     * * @return la lista dei progetti caricati
-     * @throws IOException se il file non esiste o è corrotto
+     * Rimuove un progetto dal supporto persistente.
+     * @param project il progetto da rimuovere
+     * @return true se rimosso con successo
      */
-    List<Project> loadAll();
+    boolean remove(Project project);
+
+    /**
+     * Carica tutti i progetti salvati (senza i task, che verranno collegati dal Manager).
+     * @return la lista dei progetti caricati
+     */
+    List<Project> findAll();
+
+    /**
+     * Rimuove tutti i progetti salvati.
+     */
+    void clearAll();
 }

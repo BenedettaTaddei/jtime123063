@@ -97,4 +97,15 @@ public interface Task {
      * @return lo scostamento temporale
      */
     double getTimeVariance();
+    /**
+     * Restituisce il progetto a cui appartiene il task.
+     * * @return il progetto genitore, o null se il task è indipendente.
+     */
+    Project getParentProject();
+
+    /**
+     * Imposta il progetto a cui appartiene questo task.
+     * * @param project il progetto genitore
+     */
+    void setParentProject(Project project);
 }
