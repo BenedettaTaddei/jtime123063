@@ -24,6 +24,7 @@ public class SimpleTask implements Task {
         if (estimatedTime < 0) {
             throw new IllegalArgumentException("La stima del tempo non può essere negativa");
         }
+
         this.id = UUID.randomUUID().toString();
         this.title = title.trim();
         this.estimatedTime = estimatedTime;
@@ -36,7 +37,18 @@ public class SimpleTask implements Task {
      */
     public SimpleTask(String id, String title, double estimatedTime,
                       double effectiveTime, boolean completed, LocalDate date) {
-        if (id == null || id.trim().isEmpty()) throw new IllegalArgumentException("ID nullo");
+        if (id == null || id.trim().isEmpty()) {
+            throw new IllegalArgumentException("ID nullo");
+        }
+        if (title == null || title.trim().isEmpty()) {
+            throw new IllegalArgumentException("Il titolo non può essere nullo o vuoto");
+        }
+        if (estimatedTime < 0) {
+            throw new IllegalArgumentException("La stima del tempo non può essere negativa");
+        }
+        if (effectiveTime < 0) {
+            throw new IllegalArgumentException("Il tempo effettivo non può essere negativo");
+        }
         this.id = id;
         this.title = title.trim();
         this.estimatedTime = estimatedTime;
@@ -45,48 +57,87 @@ public class SimpleTask implements Task {
         this.scheduledDate = date;
     }
 
-    @Override public String getId() {
+    @Override
+    public String getId() {
         return this.id;
     }
-    @Override public String getTitle() {
+
+    @Override
+    public String getTitle() {
         return this.title;
     }
-    @Override public void setTitle(String title) {
-        this.title = title;
+
+    @Override
+    public void setTitle(String title) {
+        if (title == null || title.trim().isEmpty()) {
+            throw new IllegalArgumentException("Il titolo non può essere nullo o vuoto");
+        }
+        this.title = title.trim();
     }
-    @Override public double getEstimatedTime() {
+
+    @Override
+    public double getEstimatedTime() {
         return this.estimatedTime;
     }
-    @Override public void setEstimatedTime(double hours) {
+
+    @Override
+    public void setEstimatedTime(double hours) {
+        if (hours < 0) {
+            throw new IllegalArgumentException("La stima del tempo non può essere negativa");
+        }
         this.estimatedTime = hours;
     }
-    @Override public double getEffectiveTime() {
+
+    @Override
+    public double getEffectiveTime() {
         return effectiveTime;
     }
-    @Override public void setEffectiveTime(double hours) {
+
+    @Override
+    public void setEffectiveTime(double hours) {
+        if (hours < 0) {
+            throw new IllegalArgumentException("La durata effettiva di una Task non può essere negativa");
+        }
         this.effectiveTime = hours;
     }
-    @Override public boolean isCompleted() {
+
+    @Override
+    public boolean isCompleted() {
         return completed;
     }
-    @Override public void setCompleted(boolean completed) {
+
+    @Override
+    public void setCompleted(boolean completed) {
         this.completed = completed;
     }
-    @Override public LocalDate getScheduledDate() {
+
+    @Override
+    public LocalDate getScheduledDate() {
         return scheduledDate;
     }
-    @Override public void setScheduledDate(LocalDate date) {
+
+    @Override
+    public void setScheduledDate(LocalDate date) {
+        if (date == null) {
+            throw new IllegalArgumentException("La data programmata non può essere nulla");
+        }
         this.scheduledDate = date;
     }
-    @Override public Project getParentProject() {
+
+    @Override
+    public Project getParentProject() {
         return this.parentProject;
     }
-    @Override public void setParentProject(Project project) {
+
+    @Override
+    public void setParentProject(Project project) {
         this.parentProject = project;
     }
 
     @Override
-    public double getTimeVariance() { return this.effectiveTime - this.estimatedTime; }
+    public double getTimeVariance() {
+        return this.effectiveTime - this.estimatedTime;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -97,7 +148,9 @@ public class SimpleTask implements Task {
     }
 
     @Override
-    public int hashCode() { return Objects.hash(id); }
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 
     @Override
     public String toString() {

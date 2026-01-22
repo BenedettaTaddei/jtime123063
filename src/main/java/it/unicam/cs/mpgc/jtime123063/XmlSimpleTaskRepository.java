@@ -18,7 +18,6 @@ public class XmlSimpleTaskRepository implements TaskRepository {
     public void save(Task task) {
         if (task == null) return;
         try {
-            // Rimuoviamo la versione precedente per l'aggiornamento (stile JBudget)
             remove(task);
 
             Document doc = xmlDocManager.loadDocument();

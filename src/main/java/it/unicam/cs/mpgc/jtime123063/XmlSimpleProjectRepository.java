@@ -20,10 +20,10 @@ public class XmlSimpleProjectRepository implements ProjectRepository {
     public void save(Project project) {
         if (project == null) return;
         try {
-            // 1. Rimuoviamo la versione precedente (se esiste) per gestire l'aggiornamento
+            // Rimuoviamo la versione precedente
             remove(project);
 
-            // 2. Carichiamo il documento e aggiungiamo la nuova versione
+            //Carichiamo il documento e aggiungiamo la nuova versione
             Document doc = xmlDocManager.loadDocument();
             Element section = sectionExtractor.getOrCreateSection(doc, parser.getSectionName());
 

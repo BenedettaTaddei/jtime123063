@@ -41,17 +41,24 @@ public interface Project {
     List<Task> getTasks();
 
     /**
-     * Aggiunge un'attività al progetto.
+     * Aggiunge un'attività esistente a questo progetto e ne stabilisce il legame gerarchico.
+     * <p>
+     * L'operazione è bidirezionale: l'attività viene inserita nella lista interna del progetto
+     * e il progetto stesso viene impostato come "parent" dell'attività.
+     * </p>
      *
-     * @param task il task da aggiungere, non può essere nullo
-     * @throws IllegalArgumentException se il task fornito è nullo
+     * @param task l'attività da associare a questo progetto
+     * @throws IllegalArgumentException se il task fornito è {@code null}
+     * @throws IllegalStateException se il progetto è chiuso e non può accettare nuove attività
      */
     void addTask(Task task);
 
     /**
-     * Rimuove un'attività specifica dal progetto.
+     * Rimuove il legame tra questo progetto e l'attività specificata.
+     * L'attività non viene eliminata dal sistema, ma diventa un'attività "libera".
      *
-     * @param task il task da rimuovere
+     * @param task l'attività da scollegare dal progetto
+     * @throws IllegalStateException se il progetto è chiuso
      */
     void removeTask(Task task);
 

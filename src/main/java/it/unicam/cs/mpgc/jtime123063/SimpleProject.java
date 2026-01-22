@@ -64,17 +64,6 @@ public class SimpleProject implements Project {
         return Collections.unmodifiableList(tasks);
     }
 
-    /**
-     * Metodo tecnico usato dal Manager durante il caricamento XML.
-     * Permette di ricostruire i legami anche se il progetto è già chiuso.
-     */
-    public void loadTask(Task task) {
-        if (task != null && !tasks.contains(task)) {
-            this.tasks.add(task);
-            task.setParentProject(this);
-        }
-    }
-
     @Override
     public void addTask(Task task) {
         if (this.isClosed())
@@ -137,5 +126,16 @@ public class SimpleProject implements Project {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    /**
+     * Metodo tecnico usato dal Manager durante il caricamento XML.
+     * Permette di ricostruire i legami anche se il progetto è già chiuso.
+     */
+    public void loadTask(Task task) {
+        if (task != null && !tasks.contains(task)) {
+            this.tasks.add(task);
+            task.setParentProject(this);
+        }
     }
 }
