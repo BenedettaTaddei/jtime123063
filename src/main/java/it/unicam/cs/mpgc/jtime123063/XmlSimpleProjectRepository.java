@@ -14,7 +14,7 @@ public class XmlSimpleProjectRepository implements ProjectRepository {
 
     private final XmlDocManager xmlDocManager = new XmlDocManager();
     private final XmlSectionExtractor sectionExtractor = new XmlSectionExtractor();
-    private final XmlParser<Project> parser = new SimpleProjectXmlParser();
+    private final XmlParser<Project> projectParser = new SimpleProjectXmlParser();
 
     @Override
     public void save(Project project) {
@@ -25,9 +25,9 @@ public class XmlSimpleProjectRepository implements ProjectRepository {
 
             //Carichiamo il documento e aggiungiamo la nuova versione
             Document doc = xmlDocManager.loadDocument();
-            Element section = sectionExtractor.getOrCreateSection(doc, parser.getSectionName());
+            Element section = sectionExtractor.getOrCreateSection(doc, projectParser.getSectionName());
 
-            section.appendChild(parser.toXml(project, doc));
+            section.appendChild(projectParser.toXml(project, doc));
             xmlDocManager.saveDocument(doc);
         } catch (Exception e) {
             System.err.println("Errore nel salvataggio del progetto: " + e.getMessage());
@@ -39,8 +39,8 @@ public class XmlSimpleProjectRepository implements ProjectRepository {
         if (project == null) return false;
         try {
             Document doc = xmlDocManager.loadDocument();
-            Element section = sectionExtractor.getOrCreateSection(doc, parser.getSectionName());
-            NodeList nodes = section.getElementsByTagName(parser.getElementName());
+            Element section = sectionExtractor.getOrCreateSection(doc, projectParser.getSectionName());
+            NodeList nodes = section.getElementsByTagName(projectParser.getElementName());
 
             for (int i = 0; i < nodes.getLength(); i++) {
                 Element current = (Element) nodes.item(i);
@@ -63,13 +63,13 @@ public class XmlSimpleProjectRepository implements ProjectRepository {
         try {
             // Usa il sectionExtractor per recuperare i nodi basandosi sui nomi del parser
             NodeList projectNodes = sectionExtractor.getElementsInSection(
-                    parser.getSectionName(),
-                    parser.getElementName()
+                    projectParser.getSectionName(),
+                    projectParser.getElementName()
             );
 
             for (int i = 0; i < projectNodes.getLength(); i++) {
                 Element projectElement = (Element) projectNodes.item(i);
-                projects.add(parser.fromXml(projectElement));
+                projects.add(projectParser.fromXml(projectElement));
             }
         } catch (Exception e) {
             System.err.println("Errore nel caricamento dei progetti: " + e.getMessage());
@@ -81,7 +81,7 @@ public class XmlSimpleProjectRepository implements ProjectRepository {
     public void clearAll() {
         try {
             Document doc = xmlDocManager.loadDocument();
-            Element section = sectionExtractor.getOrCreateSection(doc, parser.getSectionName());
+            Element section = sectionExtractor.getOrCreateSection(doc, projectParser.getSectionName());
 
             while (section.hasChildNodes()) {
                 section.removeChild(section.getFirstChild());

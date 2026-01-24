@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
@@ -8,6 +9,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
+
 <VBox alignment="CENTER" prefHeight="600.0" prefWidth="900.0" spacing="30.0"
       style="-fx-background-color: #f0f2f5;"
       xmlns="http://javafx.com/javafx/21.0.8" xmlns:fx="http://javafx.com/fxml/1"
@@ -19,6 +21,11 @@
                 <Label fx:id="homeLabel" text="JTime" textFill="#2c3e50">
                     <font>
                         <Font name="System Bold" size="42.0" />
+                    </font>
+                </Label>
+                <Label text="Gestione Task e Progetti" textFill="#7f8c8d">
+                    <font>
+                        <Font size="16.0" />
                     </font>
                 </Label>
             </children>
@@ -40,9 +47,10 @@
             <children>
                 <VBox alignment="CENTER" spacing="10.0" GridPane.columnIndex="0" GridPane.rowIndex="0">
                     <children>
-                        <Label text="Hello" textFill="#27ae60" style="-fx-font-weight: bold;" />
-                        <Button maxWidth="Infinity"
-                                style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 8;" text="Hello">
+                        <Label text="PROGETTI" textFill="#27ae60" style="-fx-font-weight: bold;" />
+                        <Button onAction="#goToProjectsView" maxWidth="Infinity"
+                                style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 8; -fx-font-weight: bold;"
+                                text="Gestisci Progetti">
                             <padding><Insets bottom="12.0" left="20.0" right="20.0" top="12.0" /></padding>
                         </Button>
                     </children>
@@ -50,21 +58,27 @@
 
                 <VBox alignment="CENTER" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
                     <children>
-                        <Label text="Hello" textFill="#2980b9" style="-fx-font-weight: bold;" />
-                        <Button maxWidth="Infinity"
-                                style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 8;" text="Hello">
+                        <Label text="ATTIVITÀ" textFill="#2980b9" style="-fx-font-weight: bold;" />
+                        <Button onAction="#goToTasksView" maxWidth="Infinity"
+                                style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 8; -fx-font-weight: bold;"
+                                text="Lista Task">
                             <padding><Insets bottom="12.0" left="20.0" right="20.0" top="12.0" /></padding>
                         </Button>
-
                     </children>
                 </VBox>
 
                 <HBox alignment="CENTER" GridPane.columnSpan="2" GridPane.rowIndex="1">
                     <children>
-                        <Button  prefWidth="300.0"
-                                style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-background-radius: 30; -fx-cursor: hand;" text="Hello">
-                            <padding><Insets bottom="12.0" left="20.0" right="20.0" top="12.0" /></padding>
-                        </Button>
+                        <VBox alignment="CENTER" spacing="10.0" HBox.hgrow="ALWAYS">
+                            <children>
+                                <Label text="ANALISI" textFill="#7f8c8d" style="-fx-font-weight: bold;" />
+                                <Button onAction="#goToReportView" prefWidth="400.0"
+                                        style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-background-radius: 30; -fx-cursor: hand; -fx-font-weight: bold;"
+                                        text="Visualizza Report e Tempi">
+                                    <padding><Insets bottom="12.0" left="20.0" right="20.0" top="12.0" /></padding>
+                                </Button>
+                            </children>
+                        </VBox>
                     </children>
                 </HBox>
             </children>

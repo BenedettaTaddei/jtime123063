@@ -65,7 +65,7 @@ public class SimpleProject implements Project {
     }
 
     @Override
-    public void addTask(Task task) {
+    public void addParentTask(Task task) {
         if (this.isClosed())
             throw new IllegalStateException("Non puoi aggiungere task a un progetto chiuso");
         if (task == null) {
@@ -76,7 +76,7 @@ public class SimpleProject implements Project {
     }
 
     @Override
-    public void removeTask(Task task) {
+    public void removeParentTask(Task task) {
         if (this.isClosed()) {
             throw new IllegalStateException("Non è possibile rimuovere task da un progetto chiuso.");
         }

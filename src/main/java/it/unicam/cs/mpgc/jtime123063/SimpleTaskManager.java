@@ -24,7 +24,7 @@ public class SimpleTaskManager implements TaskManager {
             throw new IllegalArgumentException("Impossibile eliminare una task null");
         }
         if (task.getParentProject() != null) {
-            task.getParentProject().removeTask(task);
+            task.getParentProject().removeParentTask(task);
         }
         this.taskRepository.remove(task);
     }

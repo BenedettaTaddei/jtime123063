@@ -11,12 +11,16 @@ public class SimpleProjectManager implements ProjectManager {
     }
 
     @Override
-    public void addProject(Project project) {
+    public void saveProject(Project project) {
         this.projectRepository.save(project);
     }
 
     @Override
-    public void removeProject(Project project) {
+    public void deleteProjectRecord(Project project) {
+        if (project == null){
+            throw  new IllegalArgumentException("impossibile eliminare un progetto nullo ");
+        }
+        //Eliminiamo il progetto dal ProjectRepository
         this.projectRepository.remove(project);
     }
 

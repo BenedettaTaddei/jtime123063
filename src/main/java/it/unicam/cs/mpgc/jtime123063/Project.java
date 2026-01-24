@@ -51,7 +51,7 @@ public interface Project {
      * @throws IllegalArgumentException se il task fornito è {@code null}
      * @throws IllegalStateException se il progetto è chiuso e non può accettare nuove attività
      */
-    void addTask(Task task);
+    void addParentTask(Task task);
 
     /**
      * Rimuove il legame tra questo progetto e l'attività specificata.
@@ -60,7 +60,7 @@ public interface Project {
      * @param task l'attività da scollegare dal progetto
      * @throws IllegalStateException se il progetto è chiuso
      */
-    void removeTask(Task task);
+    void removeParentTask(Task task);
 
     /**
      * Verifica se il progetto è attualmente nello stato chiuso.
