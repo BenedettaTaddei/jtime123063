@@ -19,26 +19,21 @@ public class MainView implements Initializable {
 
     @FXML private Label homeLabel;
 
-    // I nostri nuovi motori di logica
     private JTimeManager jTimeManager;
     private ProjectManager projectManager;
     private TaskManager taskManager;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // 1. Inizializziamo i Repository con i nomi corretti presenti nel tuo progetto
         ProjectRepository projectRepo = new XmlSimpleProjectRepository();
         TaskRepository taskRepo = new XmlSimpleTaskRepository();
 
-        // 2. Creiamo i Manager
         this.projectManager = new SimpleProjectManager(projectRepo);
         this.taskManager = new SimpleTaskManager(taskRepo);
 
-        // 3. Il coordinatore che gestisce le relazioni
         this.jTimeManager = new JTimeManager(projectManager, taskManager);
 
-        // 4. Aggiorniamo la label (aggiungi una parentesi chiusa alla fine se manca)
-        homeLabel.setText("JTime - " + projectManager.getAllProjects().size());
+        homeLabel.setText("JTime");
     }
 
     // Metodo generico per cambiare scena passandogli il manager
@@ -69,8 +64,8 @@ public class MainView implements Initializable {
         changeScene(event, "/TasksView.fxml", "Lista Attività");
     }
 
-    @FXML
-    public void goToReportView(ActionEvent event) throws IOException {
-        changeScene(event, "/ReportView.fxml", "Statistiche e Report");
-    }
+//    @FXML
+//    public void goToReportView(ActionEvent event) throws IOException {
+//        changeScene(event, "/ReportView.fxml", "Statistiche e Report");
+//    }
 }

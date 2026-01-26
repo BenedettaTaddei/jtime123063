@@ -91,4 +91,8 @@ public interface Project {
     double getTotalEstimatedTime();
 
     double getTotalEffectiveTime();
+
+    double getCompletionPercentage();
+
+    boolean isCompleted();
 }

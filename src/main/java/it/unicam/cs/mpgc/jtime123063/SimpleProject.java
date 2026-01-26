@@ -92,7 +92,7 @@ public class SimpleProject implements Project {
 
     @Override
     public boolean canBeClosed() {
-        // Un progetto può essere chiuso solo se tutti i task sono completati
+        if (tasks.isEmpty()) return true;
         return tasks.stream().allMatch(Task::isCompleted);
     }
 
@@ -106,6 +106,9 @@ public class SimpleProject implements Project {
 
     @Override
     public double getTotalEstimatedTime() {
+//        if (tasks == null || tasks.isEmpty()) {
+//            return 0.0;
+//        }
         return tasks.stream().mapToDouble(Task::getEstimatedTime).sum();
     }
 
@@ -114,7 +117,23 @@ public class SimpleProject implements Project {
         return tasks.stream().mapToDouble(Task::getEffectiveTime).sum();
     }
 
-    // Fondamentali per far funzionare correttamente Repo.remove() e Repo.save()
+    /**
+     * Calcola la percentuale di avanzamento in base ai task completati.
+     */
+    public double getCompletionPercentage() {
+        if (tasks.isEmpty()) return 0.0;
+        long completedCount = tasks.stream().filter(Task::isCompleted).count();
+        return (double) completedCount / tasks.size() * 100.0;
+    }
+
+    /**
+     * Un progetto è considerato "Completato" logicamente se tutti i task lo sono,
+     * indipendentemente dal flag 'closed' amministrativo.
+     */
+    public boolean isCompleted() {
+        return !tasks.isEmpty() && tasks.stream().allMatch(Task::isCompleted);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -124,9 +143,7 @@ public class SimpleProject implements Project {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
+    public int hashCode() { return Objects.hash(id); }
 
     /**
      * Metodo tecnico usato dal Manager durante il caricamento XML.
@@ -137,5 +154,9 @@ public class SimpleProject implements Project {
             this.tasks.add(task);
             task.setParentProject(this);
         }
+    }
+
+    @Override
+    public String toString() { return this.name;
     }
 }
