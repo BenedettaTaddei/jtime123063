@@ -73,4 +73,56 @@ public class JTimeManager {
                         (t.getScheduledDate().isEqual(end) || t.getScheduledDate().isBefore(end)))
                 .collect(Collectors.toList());
     }
+    //    public void syncData() {
+//        List<Task> allTasks = taskManager.getAllTasks();
+//        List<Project> allProjects = projectManager.getAllProjects();
+//
+//        XmlSimpleTaskRepository repo = (XmlSimpleTaskRepository) ((SimpleTaskManager) taskManager).getRepository();
+//
+//        for (Task task : allTasks) {
+//            String savedProjectId = repo.getProjectIdForTask(task.getId());
+//
+//            //savedProjectId = null!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11
+//            if (savedProjectId != null && !savedProjectId.isEmpty()) {
+//                allProjects.stream().filter(p -> p.getId().equals(savedProjectId))
+//                        .findFirst().ifPresent(p -> {((SimpleProject) p).loadTask(task);});
+//            }
+//        }
+//    }
+//    public void syncData() {
+//        List<Task> allTasks = taskManager.getAllTasks();
+//        List<Project> allProjects = projectManager.getAllProjects();
+//
+//        for (Project p : allProjects) {
+//            // Cicliamo sulle task che il progetto "sa" di avere (lette dal suo XML)
+//            for (Task taskDelProgetto : p.getTasks()) {
+//                // Cerchiamo la task corrispondente nella lista globale usando l'ID
+//                allTasks.stream()
+//                        .filter(gt -> gt.getId().equals(taskDelProgetto.getId()))
+//                        .findFirst()
+//                        .ifPresent(gt -> {
+//                            // COLLEGIAMO IL PADRE: questo trasformerà [Libero] nel nome del progetto
+//                            gt.setParentProject(p);
+//                        });
+//        }
+//    }
+// Aggiungi (List<Task> allTasks) qui dentro
+    public void syncData(List<Task> allTasks) {
+        List<Project> allProjects = projectManager.getAllProjects();
+        XmlSimpleTaskRepository repo = (XmlSimpleTaskRepository) ((SimpleTaskManager) taskManager).getRepository();
+
+        for (Task task : allTasks) {
+            String savedProjectId = repo.getProjectIdForTask(task.getId());
+
+            if (savedProjectId != null && !savedProjectId.isEmpty()) {
+                allProjects.stream()
+                        .filter(p -> p.getId().equals(savedProjectId))
+                        .findFirst()
+                        .ifPresent(p -> {
+                            // Colleghiamo il progetto all'oggetto task che è nella lista
+                            task.setParentProject(p);
+                        });
+            }
+        }
+    }
 }

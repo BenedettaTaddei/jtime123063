@@ -58,7 +58,7 @@
 
                     <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 5;">
                         <children>
-                            <Label style="-fx-font-size: 18px; -fx-font-weight: bold;" text="FILTRI AVANZATI" />
+                            <Label style="-fx-font-size: 18px; -fx-font-weight: bold;" text= "ELENCO ATTIVITÀ" />
                             <HBox alignment="CENTER_LEFT" spacing="15">
                                 <children>
                                     <Label text="Dal:" />
@@ -78,9 +78,9 @@
                             <TableView fx:id="tasksTable" minHeight="350.0" prefHeight="400.0">
                                 <columns>
                                     <TableColumn fx:id="nameColumn" minWidth="200.0" prefWidth="300.0" text="Attività" />
-                                    <TableColumn fx:id="ParentProject" minWidth="150.0" prefWidth="200.0" text="Progetto" />
-                                    <TableColumn fx:id="EstimatedTime" minWidth="80.0" prefWidth="100.0" text="Stima (h)" />
-                                    <TableColumn fx:id="EffectiveTime" minWidth="80.0" prefWidth="100.0" text="Effettivo (h)" />
+                                    <TableColumn fx:id="parentProject" minWidth="150.0" prefWidth="200.0" text="Progetto" />
+                                    <TableColumn fx:id="estimatedTime" minWidth="80.0" prefWidth="100.0" text="Stima (h)" />
+                                    <TableColumn fx:id="effectiveTime" minWidth="80.0" prefWidth="100.0" text="Effettivo (h)" />
                                     <TableColumn fx:id="statusColumn" minWidth="50.0" prefWidth="70.0" text="Completato" />
                                     <TableColumn fx:id="scheduledDate" minWidth="100.0" prefWidth="120.0" text="Scadenza" />
                                 </columns>

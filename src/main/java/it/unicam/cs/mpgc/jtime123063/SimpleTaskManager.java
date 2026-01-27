@@ -33,4 +33,7 @@ public class SimpleTaskManager implements TaskManager {
     public List<Task> getAllTasks() {
         return this.taskRepository.findAll();
     }
+    public TaskRepository getRepository() {
+        return this.taskRepository; // o il nome della variabile che usi per il repository
+    }
 }

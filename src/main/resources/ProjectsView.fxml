@@ -28,9 +28,6 @@
                                 <children>
                                     <Label style="-fx-font-weight: bold;" text="Nome Progetto:" />
                                     <TextField fx:id="projectNameField" promptText="Es. Esame di Programmazione" GridPane.columnIndex="1" />
-
-                                    <Label style="-fx-font-weight: bold;" text="Descrizione:" GridPane.rowIndex="1" />
-                                    <TextArea fx:id="descriptionField" prefHeight="80.0" promptText="Obiettivi del progetto..." wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                 </children>
                             </GridPane>
 
@@ -58,7 +55,7 @@
                                     <Label text="Stato:" style="-fx-font-weight: bold;"/>
                                     <ComboBox fx:id="statusFilter" prefWidth="150.0" promptText="Filtra per stato" />
 
-                                    <Region HBox.hgrow="ALWAYS" /> <Button onAction="#applyFilters" style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" text="Applica" />
+                                    <Button onAction="#applyFilters" style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" text="Applica Filtri" />
                                     <Button onAction="#resetFilters" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-cursor: hand;" text="Reset" />
                                 </children>
                             </HBox>

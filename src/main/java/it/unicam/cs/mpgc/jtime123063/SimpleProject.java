@@ -150,13 +150,14 @@ public class SimpleProject implements Project {
      * Permette di ricostruire i legami anche se il progetto è già chiuso.
      */
     public void loadTask(Task task) {
-        if (task != null && !tasks.contains(task)) {
+        if (task == null) return;
+        if (!this.tasks.contains(task)) {
             this.tasks.add(task);
-            task.setParentProject(this);
         }
+        task.setParentProject(this);
     }
-
     @Override
-    public String toString() { return this.name;
+    public String toString() {
+        return this.name;
     }
 }

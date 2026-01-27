@@ -13,7 +13,6 @@ public class SimpleTaskXmlParser implements XmlParser<Task> {
     private static final String SECTION_NAME = "tasks_store";
     private static final String ELEMENT_NAME = "task";
 
-    // Attributi XML
     private static final String ID_ATTR = "id";
     private static final String TITLE_ATTR = "title";
     private static final String EST_TIME_ATTR = "estimatedTime";
@@ -36,7 +35,6 @@ public class SimpleTaskXmlParser implements XmlParser<Task> {
         double effTime = Double.parseDouble(element.getAttribute(EFF_TIME_ATTR));
         boolean completed = Boolean.parseBoolean(element.getAttribute(COMPLETED_ATTR));
 
-        // Lettura della data (Pianificazione)
         LocalDate date = null;
         if (element.hasAttribute(DATE_ATTR) && !element.getAttribute(DATE_ATTR).isEmpty()) {
             date = LocalDate.parse(element.getAttribute(DATE_ATTR));
@@ -44,11 +42,8 @@ public class SimpleTaskXmlParser implements XmlParser<Task> {
             date = LocalDate.now(); // Default se mancante
         }
 
-        // Creiamo il task (il collegamento al Project sarà fatto dal Manager tramite l'attributo project_id)
         SimpleTask task = new SimpleTask(id, title, estTime, effTime, completed, date);
 
-        // Salviamo temporaneamente l'ID del progetto nell'oggetto task se necessario,
-        // o lo recupereremo direttamente dall'elemento XML nel manager.
         return task;
     }
 
@@ -61,12 +56,10 @@ public class SimpleTaskXmlParser implements XmlParser<Task> {
         el.setAttribute(EFF_TIME_ATTR, String.valueOf(task.getEffectiveTime()));
         el.setAttribute(COMPLETED_ATTR, String.valueOf(task.isCompleted()));
 
-        // Salvataggio data
         if (task.getScheduledDate() != null) {
             el.setAttribute(DATE_ATTR, task.getScheduledDate().toString());
         }
 
-        // Salvataggio riferimento al progetto (Fondamentale per la persistenza piatta)
         String parentId = (task.getParentProject() != null) ? task.getParentProject().getId() : "";
         el.setAttribute(PROJECT_REF_ATTR, parentId);
 

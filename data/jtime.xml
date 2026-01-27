@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <jtime>
   <tasks_store>
-    <task completed="false" effectiveTime="0.0" estimatedTime="4.0" id="62a43221-092e-4ea1-aea1-f5c99303f883" project_id="" title="TaskProva6"/>
-    <task completed="false" effectiveTime="0.0" estimatedTime="3.5" id="fdaa39c3-5d20-45c4-8f8a-50fa7488bf78" project_id="" title="TaskProva7"/>
-    <task completed="false" effectiveTime="0.0" estimatedTime="1.0" id="1b634401-e786-465e-938b-93384cdb3569" project_id="" scheduledDate="2026-01-31" title="TaskProva8"/>
-    <task completed="false" effectiveTime="0.0" estimatedTime="1.0" id="c62da57d-0204-49a7-9742-f2c3e1f55730" project_id="" scheduledDate="2026-01-15" title="TaskProva9"/>
-    <task completed="false" effectiveTime="0.0" estimatedTime="2.0" id="39d34002-c245-4947-8a00-42509c664c74" project_id="" scheduledDate="2026-02-13" title="TaskProva10"/>
-    <task completed="false" effectiveTime="0.0" estimatedTime="2.0" id="ed2cccc0-9fbd-449a-af61-e49ac71fbf49" project_id="" scheduledDate="2026-01-29" title="TaskProva11"/>
-    <task completed="false" effectiveTime="0.0" estimatedTime="0.5" id="5cc971a8-60a6-4d5b-a51c-313186820c54" project_id="" scheduledDate="2026-01-26" title="TaskProva1"/>
-    <task completed="false" effectiveTime="0.0" estimatedTime="1.5" id="d76caa17-4e5e-4b39-bfbc-ca43d3e26bc7" project_id="" scheduledDate="2026-02-01" title="TaskProva2"/>
-    <task completed="false" effectiveTime="0.0" estimatedTime="3.0" id="63a5442a-8812-4d36-b95d-90e5cc1a2a3f" project_id="" scheduledDate="2026-01-29" title="TaskProva3"/>
-    <task completed="false" effectiveTime="0.0" estimatedTime="2.0" id="d7acc34c-9ad5-4f03-aa87-6fd404c525a8" project_id="" scheduledDate="2026-01-26" title="TaskProva3"/>
+    <task completed="false" effectiveTime="0.0" estimatedTime="1.5" id="b63dc1fc-c3c4-4d3c-99e7-c4bfddac2ffd" project_id="2be112e5-e92f-4701-b1e7-3712832f98b2" scheduledDate="2026-02-02" title="TaskProva4"/>
+    <task completed="false" effectiveTime="0.0" estimatedTime="3.0" id="933a4dc3-e419-480b-af34-4dbf88e740a3" project_id="69b70d32-ae5c-4c9b-9c29-4b87194970f2" scheduledDate="2026-01-31" title="task prova prova"/>
+    <task completed="false" effectiveTime="0.0" estimatedTime="1.0" id="855804b9-6fa2-40ec-9a06-2e18364e14b3" project_id="2be112e5-e92f-4701-b1e7-3712832f98b2" scheduledDate="2026-01-26" title="task PROVA"/>
+    <task completed="false" effectiveTime="0.0" estimatedTime="1.0" id="e5f37825-68ed-4fd2-ae8b-943e5dfe496d" project_id="69b70d32-ae5c-4c9b-9c29-4b87194970f2" scheduledDate="2026-01-26" title="task ancora"/>
+    <task completed="false" effectiveTime="0.0" estimatedTime="5.0" id="3cab12ba-a57c-4726-b7c0-e25d53061965" project_id="69b70d32-ae5c-4c9b-9c29-4b87194970f2" scheduledDate="2026-01-27" title="task PROVA PROVATA"/>
+    <task completed="false" effectiveTime="0.0" estimatedTime="2.0" id="36354287-b70b-4926-9530-fc6790de9953" project_id="69b70d32-ae5c-4c9b-9c29-4b87194970f2" scheduledDate="2026-01-28" title="task Nuovo"/>
+    <task completed="false" effectiveTime="0.0" estimatedTime="12.0" id="9fd50114-91e2-44f1-b024-909a465e030c" project_id="2be112e5-e92f-4701-b1e7-3712832f98b2" scheduledDate="2026-01-26" title="Task 823"/>
+    <task completed="false" effectiveTime="0.0" estimatedTime="1.0" id="91a5a927-10d6-465f-9bf0-2607833ecb11" project_id="2be112e5-e92f-4701-b1e7-3712832f98b2" scheduledDate="2026-01-26" title="iug"/>
+    <task completed="false" effectiveTime="0.0" estimatedTime="9.0" id="cf498821-aa99-4fee-ab6a-27f252ee4d26" project_id="2be112e5-e92f-4701-b1e7-3712832f98b2" scheduledDate="2026-01-27" title="iiii"/>
   </tasks_store>
+  <projects_store>
+    <project closed="false" id="69b70d32-ae5c-4c9b-9c29-4b87194970f2" name="progetto2"/>
+    <project closed="false" id="2be112e5-e92f-4701-b1e7-3712832f98b2" name="Progetto settimanale"/>
+  </projects_store>
 </jtime>

@@ -4,15 +4,17 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class XmlSimpleTaskRepository implements TaskRepository {
 
     private final XmlDocManager xmlDocManager = new XmlDocManager();
     private final XmlSectionExtractor sectionExtractor = new XmlSectionExtractor();
-
-    // Usiamo il parser come "esperto" della struttura
     private final XmlParser<Task> taskParser = new SimpleTaskXmlParser();
+
+    private Map<String, String> taskToProjectMap = new HashMap<>();
 
     @Override
     public void save(Task task) {
@@ -56,19 +58,22 @@ public class XmlSimpleTaskRepository implements TaskRepository {
     @Override
     public List<Task> findAll() {
         List<Task> allTasks = new ArrayList<>();
+        taskToProjectMap.clear(); // Svuota la mappa vecchia
         try {
-            // Recuperiamo i nodi usando i nomi forniti dal parser
-            NodeList nodes = sectionExtractor.getElementsInSection(
-                    taskParser.getSectionName(),
-                    taskParser.getElementName()
-            );
-
+            NodeList nodes = sectionExtractor.getElementsInSection(taskParser.getSectionName(), taskParser.getElementName());
             for (int i = 0; i < nodes.getLength(); i++) {
-                allTasks.add(taskParser.fromXml((Element) nodes.item(i)));
+                Element el = (Element) nodes.item(i);
+
+                // LEGGI L'ID E SALVALO NELLA MAPPA
+                String tid = el.getAttribute("id");
+                String pid = el.getAttribute("project_id");
+                if (!pid.isEmpty()) {
+                    taskToProjectMap.put(tid, pid);
+                }
+
+                allTasks.add(taskParser.fromXml(el));
             }
-        } catch (Exception e) {
-            System.err.println("Errore FIND_ALL: " + e.getMessage());
-        }
+        } catch (Exception e) { /* ... */ }
         return allTasks;
     }
 
@@ -84,5 +89,10 @@ public class XmlSimpleTaskRepository implements TaskRepository {
         } catch (Exception e) {
             System.err.println("Errore CLEAR_ALL: " + e.getMessage());
         }
+    }
+    public String getProjectIdForTask(String taskId) {
+        if (taskId == null) return null;
+        // Deve usare ESATTAMENTE il nome della variabile che hai visto nel debug
+        return this.taskToProjectMap.get(taskId);
     }
 }

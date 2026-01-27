@@ -27,14 +27,15 @@ public class TasksView implements Initializable {
     @FXML private TextField taskNameField;
     @FXML private TextField durationField;
     @FXML private ComboBox<Project> projectComboBox;
-    @FXML private DatePicker dueDatePicker; // AGGIUNTO
+    @FXML private DatePicker dueDatePicker;
     @FXML private Label messageLabel;
 
+    // --- Tabella ---
     @FXML private TableView<Task> tasksTable;
     @FXML private TableColumn<Task, String> nameColumn;
-    @FXML private TableColumn<Task, String> ParentProject;
-    @FXML private TableColumn<Task, Double> EstimatedTime;
-    @FXML private TableColumn<Task, Double> EffectiveTime;
+    @FXML private TableColumn<Task, String> parentProject;
+    @FXML private TableColumn<Task, Double> estimatedTime;
+    @FXML private TableColumn<Task, Double> effectiveTime;
     @FXML private TableColumn<Task, Boolean> statusColumn;
     @FXML private TableColumn<Task, LocalDate> scheduledDate;
 
@@ -49,28 +50,32 @@ public class TasksView implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        // 1. Inizializzazione Logica (Manager e Repository)
         ProjectRepository pRepo = new XmlSimpleProjectRepository();
         TaskRepository tRepo = new XmlSimpleTaskRepository();
         this.projectManager = new SimpleProjectManager(pRepo);
         this.taskManager = new SimpleTaskManager(tRepo);
         this.jTimeManager = new JTimeManager(projectManager, taskManager);
 
-        // Configurazione Colonne
+        // 2. Configurazione Colonne Tabella
+        // Usiamo "title" perché il getter nella tua classe SimpleTask è getTitle()
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
-        EstimatedTime.setCellValueFactory(new PropertyValueFactory<>("estimatedTime"));
-        EffectiveTime.setCellValueFactory(new PropertyValueFactory<>("effectiveTime"));
+        estimatedTime.setCellValueFactory(new PropertyValueFactory<>("estimatedTime"));
+        effectiveTime.setCellValueFactory(new PropertyValueFactory<>("effectiveTime"));
         statusColumn.setCellValueFactory(new PropertyValueFactory<>("completed"));
         scheduledDate.setCellValueFactory(new PropertyValueFactory<>("scheduledDate"));
 
-        ParentProject.setCellValueFactory(cellData -> {
+        // Gestione dinamica del nome progetto (Libera vs Nome Progetto)
+        parentProject.setCellValueFactory(cellData -> {
             Project p = cellData.getValue().getParentProject();
             return new SimpleStringProperty(p != null ? p.getName() : "Libera");
         });
 
-        // Inizializzazione data a oggi
+        // 3. Setup Iniziale UI
         dueDatePicker.setValue(LocalDate.now());
-
         setupComboBoxes();
+
+        // 4. Caricamento iniziale dei dati
         refreshTable();
     }
 
@@ -92,69 +97,69 @@ public class TasksView implements Initializable {
             String title = taskNameField.getText().trim();
             double duration = Double.parseDouble(durationField.getText().replace(",", "."));
             Project selectedProject = projectComboBox.getValue();
-            LocalDate date = dueDatePicker.getValue(); // RECUPERO DATA
+            LocalDate date = dueDatePicker.getValue();
 
+            // Creazione Task
             Task newTask = new SimpleTask(title, duration);
-            newTask.setScheduledDate(date); // SET DELLA DATA NEL MODELLO
+            newTask.setScheduledDate(date);
 
+            // Salvataggio tramite Manager
             if (selectedProject != null) {
+                // Il Manager si occupa di settare il Parent e salvare entrambi
                 jTimeManager.addNewTaskToProject(selectedProject, newTask);
             } else {
                 taskManager.saveTask(newTask);
             }
 
-            showStatus("Task pianificata per il " + date + " con successo!", false);
+            showStatus("Task salvata con successo!", false);
             handleClearForm();
-            refreshTable();
+            refreshTable(); // Refresh automatico come in jBudget
 
         } catch (NumberFormatException e) {
-            showStatus("Errore: Durata non valida.", true);
+            showStatus("Errore: Durata non valida (usa i numeri).", true);
         } catch (Exception e) {
-            showStatus("Errore nel salvataggio.", true);
+            showStatus("Errore nel salvataggio della task.", true);
+            e.printStackTrace();
         }
-    }
-
-    private void loadTasks(String filterProjectName) {
-        List<Task> allTasks = taskManager.getAllTasks();
-        List<Task> filteredTasks = allTasks.stream()
-                .filter(t -> {
-                    if (filterProjectName == null || filterProjectName.equals("Tutti")) return true;
-                    return t.getParentProject() != null && t.getParentProject().getName().equals(filterProjectName);
-                })
-                .collect(Collectors.toList());
-
-        tasksTable.setItems(FXCollections.observableArrayList(filteredTasks));
     }
 
     @FXML
     private void applyFilters() {
-        String selectedProject = projectFilter.getValue();
+        // Recuperiamo i criteri dai filtri
+        String selectedProjectName = projectFilter.getValue();
         LocalDate start = startDatePicker.getValue();
         LocalDate end = endDatePicker.getValue();
 
+        // Carichiamo i dati applicando i filtri
+        loadTasksTable(selectedProjectName, start, end);
+    }
+
+    private void loadTasksTable(String filterProject, LocalDate start, LocalDate end) {
+        // 1. PRENDIAMO la lista (qui le task sono ancora [Libero])
         List<Task> allTasks = taskManager.getAllTasks();
 
-        List<Task> filteredTasks = allTasks.stream()
+        jTimeManager.syncData(allTasks);
+
+        // 3. Applichiamo lo stream di filtraggio
+        List<Task> filtered = allTasks.stream()
                 .filter(t -> {
                     // Filtro Progetto
-                    boolean matchesProject = (selectedProject == null || selectedProject.equals("Tutti")) ||
-                            (t.getParentProject() != null && t.getParentProject().getName().equals(selectedProject));
-
-                    // Filtro Date (Pianificazione)
+                    if (filterProject == null || filterProject.equals("Tutti")) return true;
+                    return t.getParentProject() != null && t.getParentProject().getName().equals(filterProject);
+                })
+                .filter(t -> {
+                    // Filtro Range Date
                     LocalDate taskDate = t.getScheduledDate();
-                    boolean matchesDate = true;
-                    if (taskDate != null) {
-                        if (start != null && taskDate.isBefore(start)) matchesDate = false;
-                        if (end != null && taskDate.isAfter(end)) matchesDate = false;
-                    } else if (start != null || end != null) {
-                        matchesDate = false; // Se cerco per data, escludo i task senza data
-                    }
-
-                    return matchesProject && matchesDate;
+                    if (taskDate == null) return (start == null && end == null);
+                    if (start != null && taskDate.isBefore(start)) return false;
+                    if (end != null && taskDate.isAfter(end)) return false;
+                    return true;
                 })
                 .collect(Collectors.toList());
 
-        tasksTable.setItems(FXCollections.observableArrayList(filteredTasks));
+        // 4. Inviamo alla Tabella
+        tasksTable.setItems(FXCollections.observableArrayList(filtered));
+        tasksTable.refresh();
     }
 
     @FXML
@@ -162,15 +167,18 @@ public class TasksView implements Initializable {
         startDatePicker.setValue(null);
         endDatePicker.setValue(null);
         projectFilter.getSelectionModel().selectFirst();
-        applyFilters();
+        refreshTable();
     }
 
     private void refreshTable() {
-        setupComboBoxes();
-        applyFilters();
+        setupComboBoxes(); // Aggiorna le liste nelle ComboBox
+        applyFilters();    // Sincronizza e ricarica la tabella
     }
 
-    @FXML private void handleClearProjectSelection() { projectComboBox.getSelectionModel().clearSelection(); }
+    @FXML
+    private void handleClearProjectSelection() {
+        projectComboBox.getSelectionModel().clearSelection();
+    }
 
     @FXML
     private void handleClearForm() {
@@ -183,7 +191,7 @@ public class TasksView implements Initializable {
 
     private boolean validateInput() {
         if (taskNameField.getText().trim().isEmpty() || durationField.getText().trim().isEmpty() || dueDatePicker.getValue() == null) {
-            showStatus("Errore: Nome, Durata e Data sono obbligatori.", true);
+            showStatus("Errore: Titolo, Durata e Scadenza sono obbligatori.", true);
             return false;
         }
         return true;
