@@ -63,6 +63,10 @@ public class SimpleProject implements Project {
     public List<Task> getTasks() {
         return Collections.unmodifiableList(tasks);
     }
+    @Override
+    public int getTaskCount() {
+        return tasks.size();
+    }
 
     @Override
     public void addParentTask(Task task) {
@@ -160,4 +164,10 @@ public class SimpleProject implements Project {
     public String toString() {
         return this.name;
     }
+
+    @Override
+    public void clearTasks() {
+        this.tasks.clear();
+    }
+
 }

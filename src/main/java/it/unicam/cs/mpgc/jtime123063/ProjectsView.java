@@ -22,6 +22,10 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
+/**
+ * Controller per la gestione dei Progetti.
+ * Utilizza esclusivamente JTimeManager come Facade per l'accesso ai dati sincronizzati.
+ */
 public class ProjectsView implements Initializable {
 
     @FXML private TextField projectNameField;
@@ -38,34 +42,38 @@ public class ProjectsView implements Initializable {
     @FXML private ComboBox<String> statusFilter;
     @FXML private TextField searchBar;
 
-    private ProjectManager projectManager;
+    // L'UNICO manager necessario: Architettura Facade pulita
+    private JTimeManager jTimeManager;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        ProjectRepository pRepo = new XmlSimpleProjectRepository();
-        this.projectManager = new SimpleProjectManager(pRepo);
-
+        initManagers();
         setupTableColumns();
         setupFilters();
         refreshTable();
     }
 
+    private void initManagers() {
+        // I manager di basso livello sono creati localmente e passati al Facade
+        ProjectManager pMan = new SimpleProjectManager(new XmlSimpleProjectRepository());
+        TaskManager tMan = new SimpleTaskManager(new XmlSimpleTaskRepository());
+        this.jTimeManager = new JTimeManager(pMan, tMan);
+    }
+
     private void setupTableColumns() {
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 
-        // Calcolo dinamico del numero di task
+        // Calcolo dinamico: i dati sono disponibili grazie alla sincronizzazione nel Facade
         taskCountColumn.setCellValueFactory(cellData ->
                 new SimpleIntegerProperty(cellData.getValue().getTasks().size()).asObject());
 
-        // Calcolo dinamico del tempo totale stimato
+
         totalEstimatedColumn.setCellValueFactory(cellData ->
                 new SimpleDoubleProperty(cellData.getValue().getTotalEstimatedTime()).asObject());
 
-        // Calcolo dinamico del tempo totale effettivo
         totalEffectiveColumn.setCellValueFactory(cellData ->
                 new SimpleDoubleProperty(cellData.getValue().getTotalEffectiveTime()).asObject());
 
-        // Colonna % Avanzamento (Elegante)
         completionColumn.setCellValueFactory(cellData -> {
             double percent = cellData.getValue().getCompletionPercentage();
             return new SimpleStringProperty(String.format("%.1f%%", percent));
@@ -73,7 +81,7 @@ public class ProjectsView implements Initializable {
     }
 
     private void setupFilters() {
-        statusFilter.getItems().addAll("Tutti", "In Corso", "Completati");
+        statusFilter.getItems().setAll("Tutti", "In Corso", "Completati");
         statusFilter.getSelectionModel().selectFirst();
     }
 
@@ -85,9 +93,11 @@ public class ProjectsView implements Initializable {
             return;
         }
 
-        // Creazione e salvataggio
-        Project newProject = new SimpleProject(name); // Assicurati di avere questo costruttore
-        projectManager.saveProject(newProject);
+        // Creazione di un progetto (operazione semplice, gestita tramite il Facade se necessario)
+        // Qui usiamo il costruttore del progetto e lo salviamo tramite jTimeManager
+        Project newProject = new SimpleProject(name);
+        // Nota: se non hai jTimeManager.saveProject, puoi aggiungerlo come metodo ponte
+        jTimeManager.saveProject(newProject);
 
         showStatus("Progetto creato con successo!", false);
         projectNameField.clear();
@@ -100,16 +110,21 @@ public class ProjectsView implements Initializable {
         String query = searchBar.getText().toLowerCase();
         String status = statusFilter.getValue();
 
-        List<Project> filtered = projectManager.getAllProjects().stream()
+        // Chiediamo i dati freschi e sincronizzati al Facade
+        jTimeManager.getAllSyncedTasks(); // Questa chiamata popola internamente i progetti
+        List<Project> allProjects = jTimeManager.getAllProjects();
+
+        List<Project> filtered = allProjects.stream()
                 .filter(p -> p.getName().toLowerCase().contains(query))
                 .filter(p -> {
-                    if (status.equals("Completati")) return p.isCompleted();
-                    if (status.equals("In Corso")) return !p.isCompleted();
+                    if ("Completati".equals(status)) return p.getCompletionPercentage() == 100.0;
+                    if ("In Corso".equals(status)) return p.getCompletionPercentage() < 100.0;
                     return true;
                 })
                 .collect(Collectors.toList());
 
         projectsTable.setItems(FXCollections.observableArrayList(filtered));
+        projectsTable.refresh();
     }
 
     @FXML
@@ -120,7 +135,16 @@ public class ProjectsView implements Initializable {
     }
 
     private void refreshTable() {
-        projectsTable.setItems(FXCollections.observableArrayList(projectManager.getAllProjects()));
+        // 1. Chiediamo la lista dei progetti al Facade
+        List<Project> projects = jTimeManager.getAllProjects();
+
+        // 2. Chiediamo al Facade di sincronizzare tutto internamente.
+        // Passiamo la lista dei progetti così il manager può riempirli con i task corretti.
+        jTimeManager.syncData(projects);
+
+        // 3. Ora visualizziamo i progetti (che il manager ha appena popolato)
+        projectsTable.setItems(FXCollections.observableArrayList(projects));
+        projectsTable.refresh();
     }
 
     private void showStatus(String msg, boolean isError) {

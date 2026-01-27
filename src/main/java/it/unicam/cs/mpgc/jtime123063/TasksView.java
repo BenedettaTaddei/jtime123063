@@ -11,7 +11,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
+import javafx.util.converter.DoubleStringConverter;
 
 import java.io.IOException;
 import java.net.URL;
@@ -21,72 +23,161 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
+/**
+ * Controller per la gestione della vista Task.
+ * Implementa la logica di presentazione delegando le operazioni di business a JTimeManager.
+ */
 public class TasksView implements Initializable {
 
-    // --- Elementi UI: Inserimento ---
-    @FXML private TextField taskNameField;
-    @FXML private TextField durationField;
+    @FXML private TextField taskNameField, durationField;
     @FXML private ComboBox<Project> projectComboBox;
-    @FXML private DatePicker dueDatePicker;
+    @FXML private ComboBox<String> projectFilter;
+    @FXML private DatePicker dueDatePicker, startDatePicker, endDatePicker;
     @FXML private Label messageLabel;
 
-    // --- Tabella ---
     @FXML private TableView<Task> tasksTable;
-    @FXML private TableColumn<Task, String> nameColumn;
-    @FXML private TableColumn<Task, String> parentProject;
-    @FXML private TableColumn<Task, Double> estimatedTime;
-    @FXML private TableColumn<Task, Double> effectiveTime;
+    @FXML private TableColumn<Task, String> nameColumn, parentProject;
+    @FXML private TableColumn<Task, Double> estimatedTime, effectiveTime;
     @FXML private TableColumn<Task, Boolean> statusColumn;
     @FXML private TableColumn<Task, LocalDate> scheduledDate;
-
-    // --- Elementi UI: Filtri ---
-    @FXML private ComboBox<String> projectFilter;
-    @FXML private DatePicker startDatePicker;
-    @FXML private DatePicker endDatePicker;
+    @FXML private TableColumn<Task, Void> deleteColumn;
 
     private JTimeManager jTimeManager;
     private ProjectManager projectManager;
-    private TaskManager taskManager;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // 1. Inizializzazione Logica (Manager e Repository)
-        ProjectRepository pRepo = new XmlSimpleProjectRepository();
-        TaskRepository tRepo = new XmlSimpleTaskRepository();
-        this.projectManager = new SimpleProjectManager(pRepo);
-        this.taskManager = new SimpleTaskManager(tRepo);
-        this.jTimeManager = new JTimeManager(projectManager, taskManager);
-
-        // 2. Configurazione Colonne Tabella
-        // Usiamo "title" perché il getter nella tua classe SimpleTask è getTitle()
-        nameColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
-        estimatedTime.setCellValueFactory(new PropertyValueFactory<>("estimatedTime"));
-        effectiveTime.setCellValueFactory(new PropertyValueFactory<>("effectiveTime"));
-        statusColumn.setCellValueFactory(new PropertyValueFactory<>("completed"));
-        scheduledDate.setCellValueFactory(new PropertyValueFactory<>("scheduledDate"));
-
-        // Gestione dinamica del nome progetto (Libera vs Nome Progetto)
-        parentProject.setCellValueFactory(cellData -> {
-            Project p = cellData.getValue().getParentProject();
-            return new SimpleStringProperty(p != null ? p.getName() : "Libera");
-        });
-
-        // 3. Setup Iniziale UI
-        dueDatePicker.setValue(LocalDate.now());
-        setupComboBoxes();
-
-        // 4. Caricamento iniziale dei dati
+        initManagers();
+        configureTableColumns();
+        setupInitialUI();
         refreshTable();
     }
 
+    private void initManagers() {
+        ProjectManager projectManager = new SimpleProjectManager(new XmlSimpleProjectRepository());
+        TaskManager taskManager = new SimpleTaskManager(new XmlSimpleTaskRepository());
+        this.jTimeManager = new JTimeManager(projectManager, taskManager);
+    }
+
+    private void configureTableColumns() {
+        tasksTable.setEditable(true);
+
+        // Binding dati standard
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
+        estimatedTime.setCellValueFactory(new PropertyValueFactory<>("estimatedTime"));
+        scheduledDate.setCellValueFactory(new PropertyValueFactory<>("scheduledDate"));
+        parentProject.setCellValueFactory(cellData -> {
+            Project p = cellData.getValue().getParentProject();
+            return new SimpleStringProperty(p != null ? p.getName() : "Task Libera");
+        });
+
+        setupEffectiveTimeColumn();
+        setupStatusColumn();
+        setupDeleteColumn();
+    }
+
+    private void setupEffectiveTimeColumn() {
+        effectiveTime.setCellValueFactory(new PropertyValueFactory<>("effectiveTime"));
+        effectiveTime.setCellFactory(column -> new TextFieldTableCell<>(new DoubleStringConverter()) {
+            @Override
+            public void updateItem(Double item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && getTableRow() != null && getTableRow().getItem() != null) {
+                    Task task = getTableRow().getItem();
+                    // Impedisce l'editing visivo se la task non è completata
+                    setEditable(task.isCompleted());
+                    setStyle(task.isCompleted() ? "-fx-opacity: 1;" : "-fx-opacity: 0.5;");
+                    setStyle(getStyle() + "-fx-alignment: CENTER;");
+                }
+            }
+        });
+
+        effectiveTime.setOnEditCommit(event -> {
+            Task task = event.getRowValue();
+            if (task != null && task.isCompleted()) {
+                // Delega l'aggiornamento e il salvataggio combinato (Task + Progetto) al Facade
+                jTimeManager.updateTaskEffectiveTime(task, event.getNewValue());
+                showStatus("Tempo aggiornato.", false);
+            } else {
+                refreshTable();
+                showStatus("Completa la task prima di inserire le ore!", true);
+            }
+        });
+    }
+
+    private void setupStatusColumn() {
+        statusColumn.setText("Stato");
+        statusColumn.setMinWidth(90);
+        statusColumn.setResizable(false);
+        statusColumn.setCellFactory(param -> new TableCell<>() {
+            private final CheckBox checkBox = new CheckBox();
+            {
+                setStyle("-fx-alignment: CENTER;");
+                checkBox.setOnAction(event -> {
+                    Task task = getTableRow().getItem();
+                    if (task != null) {
+                        // JTimeManager si occuperà di resettare le ore se la spunta viene tolta
+                        jTimeManager.updateTaskStatus(task, checkBox.isSelected());
+                        refreshTable();
+                        showStatus("Stato aggiornato.", false);
+                    }
+                });
+            }
+            @Override
+            protected void updateItem(Boolean item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || getTableRow() == null || getTableRow().getItem() == null) {
+                    setGraphic(null);
+                } else {
+                    checkBox.setSelected(getTableRow().getItem().isCompleted());
+                    setGraphic(checkBox);
+                }
+            }
+        });
+    }
+
+    private void setupDeleteColumn() {
+        deleteColumn.setMinWidth(80);
+        deleteColumn.setResizable(false);
+        deleteColumn.setCellFactory(param -> new TableCell<>() {
+            private final Button btnDelete = new Button("🗑");
+            {
+                btnDelete.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-cursor: hand;");
+                btnDelete.setOnAction(event -> {
+                    jTimeManager.removeTaskPermanently(getTableRow().getItem());
+                    refreshTable();
+                    showStatus("Task eliminata.", false);
+                });
+            }
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                setGraphic(empty ? null : btnDelete);
+                setStyle("-fx-alignment: CENTER;");
+            }
+        });
+    }
+
+    private void setupInitialUI() {
+        dueDatePicker.setValue(LocalDate.now());
+        setupComboBoxes();
+    }
+
     private void setupComboBoxes() {
-        List<Project> allProjects = projectManager.getAllProjects();
+        // Chiediamo i progetti al Facade, non al sottomanager
+        List<Project> allProjects = jTimeManager.getAllProjects();
+
         projectComboBox.setItems(FXCollections.observableArrayList(allProjects));
 
         projectFilter.getItems().clear();
         projectFilter.getItems().add("Tutti");
-        projectFilter.getItems().addAll(allProjects.stream().map(Project::getName).collect(Collectors.toList()));
-        projectFilter.getSelectionModel().selectFirst();
+        projectFilter.getItems().addAll(allProjects.stream()
+                .map(Project::getName)
+                .collect(Collectors.toList()));
+
+        if (projectFilter.getSelectionModel().isEmpty()) {
+            projectFilter.getSelectionModel().selectFirst();
+        }
     }
 
     @FXML
@@ -94,76 +185,47 @@ public class TasksView implements Initializable {
         try {
             if (!validateInput()) return;
 
-            String title = taskNameField.getText().trim();
-            double duration = Double.parseDouble(durationField.getText().replace(",", "."));
-            Project selectedProject = projectComboBox.getValue();
-            LocalDate date = dueDatePicker.getValue();
+            Task newTask = new SimpleTask(taskNameField.getText().trim(),
+                    Double.parseDouble(durationField.getText().replace(",", ".")));
+            newTask.setScheduledDate(dueDatePicker.getValue());
 
-            // Creazione Task
-            Task newTask = new SimpleTask(title, duration);
-            newTask.setScheduledDate(date);
+            // Delega al manager l'associazione corretta tra task e progetto (se selezionato)
+            jTimeManager.addNewTaskToProject(projectComboBox.getValue(), newTask);
 
-            // Salvataggio tramite Manager
-            if (selectedProject != null) {
-                // Il Manager si occupa di settare il Parent e salvare entrambi
-                jTimeManager.addNewTaskToProject(selectedProject, newTask);
-            } else {
-                taskManager.saveTask(newTask);
-            }
-
-            showStatus("Task salvata con successo!", false);
+            showStatus("Task salvata!", false);
             handleClearForm();
-            refreshTable(); // Refresh automatico come in jBudget
-
+            refreshTable();
         } catch (NumberFormatException e) {
-            showStatus("Errore: Durata non valida (usa i numeri).", true);
+            showStatus("Errore: Durata non valida.", true);
         } catch (Exception e) {
-            showStatus("Errore nel salvataggio della task.", true);
-            e.printStackTrace();
+            showStatus("Errore durante il salvataggio.", true);
         }
     }
 
     @FXML
     private void applyFilters() {
-        // Recuperiamo i criteri dai filtri
-        String selectedProjectName = projectFilter.getValue();
+        // La View chiede i dati già sincronizzati al Facade
+        List<Task> allTasks = jTimeManager.getAllSyncedTasks();
+
+        String filterProject = projectFilter.getValue();
         LocalDate start = startDatePicker.getValue();
         LocalDate end = endDatePicker.getValue();
 
-        // Carichiamo i dati applicando i filtri
-        loadTasksTable(selectedProjectName, start, end);
-    }
-
-    private void loadTasksTable(String filterProject, LocalDate start, LocalDate end) {
-        // 1. PRENDIAMO la lista (qui le task sono ancora [Libero])
-        List<Task> allTasks = taskManager.getAllTasks();
-
-        jTimeManager.syncData(allTasks);
-
-        // 3. Applichiamo lo stream di filtraggio
         List<Task> filtered = allTasks.stream()
+                .filter(t -> filterProject == null || filterProject.equals("Tutti") ||
+                        (t.getParentProject() != null && t.getParentProject().getName().equals(filterProject)))
                 .filter(t -> {
-                    // Filtro Progetto
-                    if (filterProject == null || filterProject.equals("Tutti")) return true;
-                    return t.getParentProject() != null && t.getParentProject().getName().equals(filterProject);
-                })
-                .filter(t -> {
-                    // Filtro Range Date
-                    LocalDate taskDate = t.getScheduledDate();
-                    if (taskDate == null) return (start == null && end == null);
-                    if (start != null && taskDate.isBefore(start)) return false;
-                    if (end != null && taskDate.isAfter(end)) return false;
-                    return true;
+                    LocalDate d = t.getScheduledDate();
+                    if (d == null) return (start == null && end == null);
+                    return (start == null || !d.isBefore(start)) && (end == null || !d.isAfter(end));
                 })
                 .collect(Collectors.toList());
 
-        // 4. Inviamo alla Tabella
         tasksTable.setItems(FXCollections.observableArrayList(filtered));
         tasksTable.refresh();
     }
 
-    @FXML
-    private void resetFilters() {
+    @FXML private void resetFilters() {
         startDatePicker.setValue(null);
         endDatePicker.setValue(null);
         projectFilter.getSelectionModel().selectFirst();
@@ -171,17 +233,15 @@ public class TasksView implements Initializable {
     }
 
     private void refreshTable() {
-        setupComboBoxes(); // Aggiorna le liste nelle ComboBox
-        applyFilters();    // Sincronizza e ricarica la tabella
+        setupComboBoxes();
+        applyFilters();
     }
 
-    @FXML
-    private void handleClearProjectSelection() {
-        projectComboBox.getSelectionModel().clearSelection();
-    }
+    // --- Metodi Utility ---
 
-    @FXML
-    private void handleClearForm() {
+    @FXML private void handleClearProjectSelection() { projectComboBox.getSelectionModel().clearSelection(); }
+
+    @FXML private void handleClearForm() {
         taskNameField.clear();
         durationField.clear();
         dueDatePicker.setValue(LocalDate.now());
@@ -191,7 +251,7 @@ public class TasksView implements Initializable {
 
     private boolean validateInput() {
         if (taskNameField.getText().trim().isEmpty() || durationField.getText().trim().isEmpty() || dueDatePicker.getValue() == null) {
-            showStatus("Errore: Titolo, Durata e Scadenza sono obbligatori.", true);
+            showStatus("Errore: Campi obbligatori mancanti.", true);
             return false;
         }
         return true;

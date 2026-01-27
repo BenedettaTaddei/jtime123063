@@ -40,6 +40,8 @@ public interface Project {
      */
     List<Task> getTasks();
 
+    int getTaskCount();
+
     /**
      * Aggiunge un'attività esistente a questo progetto e ne stabilisce il legame gerarchico.
      * <p>
@@ -95,4 +97,6 @@ public interface Project {
     double getCompletionPercentage();
 
     boolean isCompleted();
+
+    void clearTasks();
 }
