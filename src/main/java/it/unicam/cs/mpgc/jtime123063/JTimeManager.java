@@ -41,13 +41,7 @@ public class JTimeManager {
             }
         }
     }
-
-
-
-
-
-
-
+    
     public void syncData(List<Project> currentProjects) {
         List<Task> allTasks = taskManager.getAllTasks();
         XmlSimpleTaskRepository repo = (XmlSimpleTaskRepository) ((SimpleTaskManager) taskManager).getRepository();
@@ -116,6 +110,22 @@ public class JTimeManager {
             projectManager.saveProject(task.getParentProject());
         }
         taskManager.deleteTask(task);
+    }
+
+    public void removeProjectPermanently(Project project) {
+        if (project == null) return;
+        // Recuperiamo tutti i task dal taskManager
+        List<Task> allTasks = taskManager.getAllTasks();
+        this.syncData(allTasks, true);
+        // Filtriamo quelli che appartengono al progetto
+        List<Task> tasksToDelete = allTasks.stream()
+                .filter(t -> t.getParentProject() != null && t.getParentProject().getId().equals(project.getId()))
+                .collect(Collectors.toList());
+        // Eliminiamo fisicamente ogni task
+        for (Task task : tasksToDelete) {
+            taskManager.deleteTask(task);
+        }
+        projectManager.deleteProject(project);
     }
 
     // Metodi di utilità per filtri e statistiche

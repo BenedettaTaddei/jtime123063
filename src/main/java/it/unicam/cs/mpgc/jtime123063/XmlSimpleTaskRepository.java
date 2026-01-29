@@ -13,7 +13,11 @@ public class XmlSimpleTaskRepository implements TaskRepository {
     private final XmlDocManager xmlDocManager = new XmlDocManager();
     private final XmlSectionExtractor sectionExtractor = new XmlSectionExtractor();
     private final XmlParser<Task> taskParser = new SimpleTaskXmlParser();
-
+    /**
+     * Cache temporanea dei metadati di relazione (Task-Project).
+     * Necessaria per la ricostruzione del grafo degli oggetti in fase di sincronizzazione,
+     * evitando ridondanti accessi al file system.
+     */
     private Map<String, String> taskToProjectMap = new HashMap<>();
 
     @Override

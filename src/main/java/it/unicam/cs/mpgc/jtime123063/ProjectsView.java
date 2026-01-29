@@ -38,17 +38,17 @@ public class ProjectsView implements Initializable {
     @FXML private TableColumn<Project, Double> totalEstimatedColumn;
     @FXML private TableColumn<Project, Double> totalEffectiveColumn;
     @FXML private TableColumn<Project, String> completionColumn;
+    @FXML private TableColumn<Project, Void> deleteColumn;
 
     @FXML private ComboBox<String> statusFilter;
     @FXML private TextField searchBar;
 
-    // L'UNICO manager necessario: Architettura Facade pulita
     private JTimeManager jTimeManager;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         initManagers();
-        setupTableColumns();
+        configureTableColumns();
         setupFilters();
         refreshTable();
     }
@@ -60,23 +60,56 @@ public class ProjectsView implements Initializable {
         this.jTimeManager = new JTimeManager(pMan, tMan);
     }
 
-    private void setupTableColumns() {
+    private void configureTableColumns() {
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-
-        // Calcolo dinamico: i dati sono disponibili grazie alla sincronizzazione nel Facade
-        taskCountColumn.setCellValueFactory(cellData ->
-                new SimpleIntegerProperty(cellData.getValue().getTasks().size()).asObject());
-
-
-        totalEstimatedColumn.setCellValueFactory(cellData ->
-                new SimpleDoubleProperty(cellData.getValue().getTotalEstimatedTime()).asObject());
-
-        totalEffectiveColumn.setCellValueFactory(cellData ->
-                new SimpleDoubleProperty(cellData.getValue().getTotalEffectiveTime()).asObject());
-
+        taskCountColumn.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().
+                getTasks().size()).asObject());
+        totalEstimatedColumn.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().
+                getTotalEstimatedTime()).asObject());
+        totalEffectiveColumn.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().
+                getTotalEffectiveTime()).asObject());
         completionColumn.setCellValueFactory(cellData -> {
             double percent = cellData.getValue().getCompletionPercentage();
             return new SimpleStringProperty(String.format("%.1f%%", percent));
+        });
+        setupDeleteColumn();
+    }
+
+    private void setupDeleteColumn() {
+        deleteColumn.setMinWidth(80);
+        deleteColumn.setResizable(false);
+        deleteColumn.setCellFactory(param -> new TableCell<>() {
+            private final Button btnDelete = new Button("🗑");
+            {
+                btnDelete.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-cursor: hand;");
+                btnDelete.setOnAction(event -> {
+                    Project project =  getTableRow().getItem();
+                    if (project != null) {
+                        // Alert di conferma
+                        Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
+                                "Eliminare il progetto '" + project.getName() + "'? I task associati rimarranno come task libere.",
+                                ButtonType.YES, ButtonType.NO);
+
+                        alert.showAndWait().ifPresent(response -> {
+                            if (response == ButtonType.YES) {
+                                jTimeManager.removeProjectPermanently(project);
+                                refreshTable();
+                                showStatus("Progetto eliminato.", false);
+                            }
+                        });
+                    }
+                });
+            }
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || getTableRow() == null || getTableRow().getItem() == null) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(btnDelete);
+                    setStyle("-fx-alignment: CENTER;");
+                }
+            }
         });
     }
 

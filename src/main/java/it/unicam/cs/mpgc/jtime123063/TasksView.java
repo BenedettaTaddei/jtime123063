@@ -43,7 +43,6 @@ public class TasksView implements Initializable {
     @FXML private TableColumn<Task, Void> deleteColumn;
 
     private JTimeManager jTimeManager;
-    private ProjectManager projectManager;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -61,8 +60,6 @@ public class TasksView implements Initializable {
 
     private void configureTableColumns() {
         tasksTable.setEditable(true);
-
-        // Binding dati standard
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
         estimatedTime.setCellValueFactory(new PropertyValueFactory<>("estimatedTime"));
         scheduledDate.setCellValueFactory(new PropertyValueFactory<>("scheduledDate"));
@@ -70,7 +67,6 @@ public class TasksView implements Initializable {
             Project p = cellData.getValue().getParentProject();
             return new SimpleStringProperty(p != null ? p.getName() : "Task Libera");
         });
-
         setupEffectiveTimeColumn();
         setupStatusColumn();
         setupDeleteColumn();
@@ -239,7 +235,9 @@ public class TasksView implements Initializable {
 
     // --- Metodi Utility ---
 
-    @FXML private void handleClearProjectSelection() { projectComboBox.getSelectionModel().clearSelection(); }
+    @FXML private void handleClearProjectSelection() {
+        projectComboBox.getSelectionModel().clearSelection();
+    }
 
     @FXML private void handleClearForm() {
         taskNameField.clear();

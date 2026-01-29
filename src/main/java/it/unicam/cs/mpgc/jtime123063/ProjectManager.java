@@ -4,6 +4,6 @@ import java.util.List;
 
 public interface ProjectManager {
     void saveProject(Project project);
-    void deleteProjectRecord(Project project);
+    void deleteProject(Project project);
     List<Project> getAllProjects();
 }

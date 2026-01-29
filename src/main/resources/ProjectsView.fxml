@@ -67,6 +67,7 @@
                                     <TableColumn fx:id="totalEstimatedColumn" minWidth="100.0" prefWidth="120.0" text="Stima Tot (h)" />
                                     <TableColumn fx:id="totalEffectiveColumn" minWidth="100.0" prefWidth="120.0" text="Effettivo Tot (h)" />
                                     <TableColumn fx:id="completionColumn" minWidth="100.0" prefWidth="130.0" text="Avanzamento" />
+                                    <TableColumn fx:id="deleteColumn" prefWidth="120.0" text="🗑" />
                                 </columns>
                                 <columnResizePolicy>
                                     <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
