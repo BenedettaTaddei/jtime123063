@@ -7,11 +7,16 @@
     <task completed="true" effectiveTime="1.7" estimatedTime="2.0" id="a81755cd-b803-4bd3-af6b-5d1b7654b376" project_id="a6471f76-fbb5-46d0-80c9-8712d8544fc4" scheduledDate="2026-01-29" title="taskx2"/>
     <task completed="false" effectiveTime="0.0" estimatedTime="1.0" id="c3cf920e-bc2b-4ffb-9787-024e09015a41" project_id="" scheduledDate="2026-01-29" title="taskprova"/>
     <task completed="false" effectiveTime="0.0" estimatedTime="1.0" id="e8b8253f-bac7-4e08-bba0-6473fa0af90c" project_id="a6c3f1a0-a512-4fa2-a455-bf9fd9258b30" scheduledDate="2026-01-29" title="taskprova1"/>
-    <task completed="false" effectiveTime="0.0" estimatedTime="2.0" id="8ba49bac-f266-46e3-8949-cd7cdd311e74" project_id="" scheduledDate="2026-01-28" title="task 3"/>
+    <task completed="false" effectiveTime="0.0" estimatedTime="3.0" id="f9df5216-2c7c-4242-b11a-bf78a3b735b2" project_id="" scheduledDate="2026-01-30" title="task"/>
+    <task completed="false" effectiveTime="0.0" estimatedTime="2.0" id="4e5e0c12-802b-47c1-8f21-42d1f0521e74" project_id="" scheduledDate="2026-01-30" title="task"/>
   </tasks_store>
   <projects_store>
     <project closed="false" id="200e2efa-d369-4cd1-83c0-2b4d27c8edeb" name="progetto 1"/>
     <project closed="false" id="bafb3182-e451-4710-93f4-9e685dc5ded1" name="progetto2"/>
     <project closed="false" id="a6c3f1a0-a512-4fa2-a455-bf9fd9258b30" name="progetto3"/>
+    <project closed="false" id="a8e7add2-f8fe-471a-97a1-8fcc13ca9c4f" name="prog4"/>
+    <project closed="false" id="dcf324f9-c807-4bf1-8fc4-55e7fe90282b" name="prog5"/>
+    <project closed="false" id="65a863c5-26cc-45b6-b2fb-c172726b6b4f" name="prog6"/>
+    <project closed="false" id="3afefaa7-6227-4df2-8646-f9bec26cbd00" name="trrrr"/>
   </projects_store>
 </jtime>

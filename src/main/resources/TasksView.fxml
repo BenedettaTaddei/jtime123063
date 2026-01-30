@@ -97,6 +97,6 @@
     </ScrollPane>
 
     <HBox alignment="CENTER_LEFT" style="-fx-padding: 10 5 5 5;">
-        <Button onAction="#goToMainView" style="-fx-background-color: #34495e; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" text="← Torna alla Dashboard" />
+        <Button onAction="#goToMainView" style="-fx-background-color: #34495e; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" text="← Torna alla Home" />
     </HBox>
 </VBox>

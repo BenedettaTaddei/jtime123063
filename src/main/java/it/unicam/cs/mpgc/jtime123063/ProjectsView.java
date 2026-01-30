@@ -1,5 +1,6 @@
 package it.unicam.cs.mpgc.jtime123063;
 
+import javafx.animation.PauseTransition;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -14,6 +15,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.IOException;
 import java.net.URL;
@@ -22,14 +24,9 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
-/**
- * Controller per la gestione dei Progetti.
- * Utilizza esclusivamente JTimeManager come Facade per l'accesso ai dati sincronizzati.
- */
 public class ProjectsView implements Initializable {
 
     @FXML private TextField projectNameField;
-    @FXML private TextArea descriptionField;
     @FXML private Label messageLabel;
 
     @FXML private TableView<Project> projectsTable;
@@ -49,12 +46,15 @@ public class ProjectsView implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         initManagers();
         configureTableColumns();
-        setupFilters();
+        setupInitialState();
+
+        // Ricerca in tempo reale: filtra mentre l'utente scrive
+        searchBar.textProperty().addListener((obs, oldVal, newVal) -> applyFilters());
+
         refreshTable();
     }
 
     private void initManagers() {
-        // I manager di basso livello sono creati localmente e passati al Facade
         ProjectManager pMan = new SimpleProjectManager(new XmlSimpleProjectRepository());
         TaskManager tMan = new SimpleTaskManager(new XmlSimpleTaskRepository());
         this.jTimeManager = new JTimeManager(pMan, tMan);
@@ -62,44 +62,37 @@ public class ProjectsView implements Initializable {
 
     private void configureTableColumns() {
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-        taskCountColumn.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().
-                getTasks().size()).asObject());
-        totalEstimatedColumn.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().
-                getTotalEstimatedTime()).asObject());
-        totalEffectiveColumn.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().
-                getTotalEffectiveTime()).asObject());
+
+        taskCountColumn.setCellValueFactory(cellData ->
+                new SimpleIntegerProperty(cellData.getValue().getTasks().size()).asObject());
+
+        totalEstimatedColumn.setCellValueFactory(cellData ->
+                new SimpleDoubleProperty(cellData.getValue().getTotalEstimatedTime()).asObject());
+
+        totalEffectiveColumn.setCellValueFactory(cellData ->
+                new SimpleDoubleProperty(cellData.getValue().getTotalEffectiveTime()).asObject());
+
         completionColumn.setCellValueFactory(cellData -> {
             double percent = cellData.getValue().getCompletionPercentage();
             return new SimpleStringProperty(String.format("%.1f%%", percent));
         });
+
         setupDeleteColumn();
     }
 
     private void setupDeleteColumn() {
-        deleteColumn.setMinWidth(80);
-        deleteColumn.setResizable(false);
         deleteColumn.setCellFactory(param -> new TableCell<>() {
             private final Button btnDelete = new Button("🗑");
             {
                 btnDelete.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-cursor: hand;");
                 btnDelete.setOnAction(event -> {
-                    Project project =  getTableRow().getItem();
+                    Project project = getTableRow().getItem();
                     if (project != null) {
-                        // Alert di conferma
-                        Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
-                                "Eliminare il progetto '" + project.getName() + "'? I task associati rimarranno come task libere.",
-                                ButtonType.YES, ButtonType.NO);
-
-                        alert.showAndWait().ifPresent(response -> {
-                            if (response == ButtonType.YES) {
-                                jTimeManager.removeProjectPermanently(project);
-                                refreshTable();
-                                showStatus("Progetto eliminato.", false);
-                            }
-                        });
+                        handleDeleteConfirmation(project);
                     }
                 });
             }
+
             @Override
             protected void updateItem(Void item, boolean empty) {
                 super.updateItem(item, empty);
@@ -113,7 +106,21 @@ public class ProjectsView implements Initializable {
         });
     }
 
-    private void setupFilters() {
+    private void handleDeleteConfirmation(Project project) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
+                "Eliminare il progetto '" + project.getName() + "'? I task associati rimarranno liberi.",
+                ButtonType.YES, ButtonType.NO);
+        alert.setHeaderText(null);
+        alert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.YES) {
+                jTimeManager.removeProjectPermanently(project);
+                refreshTable();
+                showStatus("Progetto eliminato.", false);
+            }
+        });
+    }
+
+    private void setupInitialState() {
         statusFilter.getItems().setAll("Tutti", "In Corso", "Completati");
         statusFilter.getSelectionModel().selectFirst();
     }
@@ -126,38 +133,35 @@ public class ProjectsView implements Initializable {
             return;
         }
 
-        // Creazione di un progetto (operazione semplice, gestita tramite il Facade se necessario)
-        // Qui usiamo il costruttore del progetto e lo salviamo tramite jTimeManager
-        Project newProject = new SimpleProject(name);
-        // Nota: se non hai jTimeManager.saveProject, puoi aggiungerlo come metodo ponte
-        jTimeManager.saveProject(newProject);
-
+        jTimeManager.saveProject(new SimpleProject(name));
+        handleClearForm();
         showStatus("Progetto creato con successo!", false);
-        projectNameField.clear();
-        descriptionField.clear();
         refreshTable();
     }
 
+    private void handleClearForm() {
+        projectNameField.clear();
+    }
+
     @FXML
-    private void applyFilters() {
-        String query = searchBar.getText().toLowerCase();
+    public void applyFilters() {
+        String query = searchBar.getText().toLowerCase().trim();
         String status = statusFilter.getValue();
 
-        // Chiediamo i dati freschi e sincronizzati al Facade
-        jTimeManager.getAllSyncedTasks(); // Questa chiamata popola internamente i progetti
-        List<Project> allProjects = jTimeManager.getAllProjects();
+        // Forza ricaricamento dati sincronizzati
+        jTimeManager.getAllSyncedTasks();
+        List<Project> projects = jTimeManager.getAllProjects();
 
-        List<Project> filtered = allProjects.stream()
+        List<Project> filtered = projects.stream()
                 .filter(p -> p.getName().toLowerCase().contains(query))
                 .filter(p -> {
-                    if ("Completati".equals(status)) return p.getCompletionPercentage() == 100.0;
+                    if ("Completati".equals(status)) return p.getCompletionPercentage() >= 100.0;
                     if ("In Corso".equals(status)) return p.getCompletionPercentage() < 100.0;
                     return true;
                 })
                 .collect(Collectors.toList());
 
         projectsTable.setItems(FXCollections.observableArrayList(filtered));
-        projectsTable.refresh();
     }
 
     @FXML
@@ -168,21 +172,17 @@ public class ProjectsView implements Initializable {
     }
 
     private void refreshTable() {
-        // 1. Chiediamo la lista dei progetti al Facade
-        List<Project> projects = jTimeManager.getAllProjects();
-
-        // 2. Chiediamo al Facade di sincronizzare tutto internamente.
-        // Passiamo la lista dei progetti così il manager può riempirli con i task corretti.
-        jTimeManager.syncData(projects);
-
-        // 3. Ora visualizziamo i progetti (che il manager ha appena popolato)
-        projectsTable.setItems(FXCollections.observableArrayList(projects));
-        projectsTable.refresh();
+        jTimeManager.syncData(jTimeManager.getAllProjects());
+        applyFilters();
     }
 
     private void showStatus(String msg, boolean isError) {
         messageLabel.setText(msg);
         messageLabel.setStyle(isError ? "-fx-text-fill: #e74c3c;" : "-fx-text-fill: #2ecc71;");
+
+        PauseTransition pause = new PauseTransition(Duration.seconds(3));
+        pause.setOnFinished(e -> messageLabel.setText(""));
+        pause.play();
     }
 
     @FXML
