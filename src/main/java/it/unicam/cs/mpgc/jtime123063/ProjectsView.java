@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 public class ProjectsView implements Initializable {
 
     @FXML private TextField projectNameField;
-    @FXML private TextArea descriptionField;
     @FXML private Label messageLabel;
 
     @FXML private TableView<Project> projectsTable;
@@ -49,7 +48,7 @@ public class ProjectsView implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         initManagers();
         configureTableColumns();
-        setupFilters();
+        setupInitialState();
         refreshTable();
     }
 
@@ -113,29 +112,47 @@ public class ProjectsView implements Initializable {
         });
     }
 
-    private void setupFilters() {
+    private void setupInitialState() {
+        setupComboBoxes();
+    }
+
+    private void setupComboBoxes() {
         statusFilter.getItems().setAll("Tutti", "In Corso", "Completati");
-        statusFilter.getSelectionModel().selectFirst();
+
+        if (statusFilter.getSelectionModel().isEmpty()) {
+            statusFilter.getSelectionModel().selectFirst();
+        }
+    }
+    @FXML
+    private void handleAddProject() {
+        if (!validateInput()) return;
+        String name = projectNameField.getText().trim();
+        try {
+            Project newProject = new SimpleProject(name);
+            jTimeManager.saveProject(newProject);
+
+            handleClearForm();
+            showStatus("Progetto creato con successo!", false);
+            refreshTable();
+        } catch (Exception e) {
+            showStatus("Errore durante il salvataggio!", true);
+        }
+    }
+    /**
+     * Verifica che i dati inseriti nel modulo progetto siano validi.
+     * @return true se il nome è presente, false altrimenti.
+     */
+    private boolean validateInput() {
+        if (projectNameField.getText().trim().isEmpty()) {
+            showStatus("Errore: Il nome del progetto è obbligatorio.", true);
+            return false;
+        }
+        return true;
     }
 
     @FXML
-    private void handleAddProject() {
-        String name = projectNameField.getText().trim();
-        if (name.isEmpty()) {
-            showStatus("Il nome è obbligatorio", true);
-            return;
-        }
-
-        // Creazione di un progetto (operazione semplice, gestita tramite il Facade se necessario)
-        // Qui usiamo il costruttore del progetto e lo salviamo tramite jTimeManager
-        Project newProject = new SimpleProject(name);
-        // Nota: se non hai jTimeManager.saveProject, puoi aggiungerlo come metodo ponte
-        jTimeManager.saveProject(newProject);
-
-        showStatus("Progetto creato con successo!", false);
+    private void handleClearForm() {
         projectNameField.clear();
-        descriptionField.clear();
-        refreshTable();
     }
 
     @FXML
@@ -143,8 +160,7 @@ public class ProjectsView implements Initializable {
         String query = searchBar.getText().toLowerCase();
         String status = statusFilter.getValue();
 
-        // Chiediamo i dati freschi e sincronizzati al Facade
-        jTimeManager.getAllSyncedTasks(); // Questa chiamata popola internamente i progetti
+        jTimeManager.getAllSyncedTasks();
         List<Project> allProjects = jTimeManager.getAllProjects();
 
         List<Project> filtered = allProjects.stream()
@@ -157,9 +173,12 @@ public class ProjectsView implements Initializable {
                 .collect(Collectors.toList());
 
         projectsTable.setItems(FXCollections.observableArrayList(filtered));
-        projectsTable.refresh();
     }
-
+    /**
+     * Ripristina i filtri di ricerca allo stato iniziale.
+     * Svuota i campi di testo, resetta le selezioni dei filtri
+     * e ricarica l'elenco completo dei dati nella tabella.
+     */
     @FXML
     private void resetFilters() {
         searchBar.clear();
@@ -168,21 +187,17 @@ public class ProjectsView implements Initializable {
     }
 
     private void refreshTable() {
-        // 1. Chiediamo la lista dei progetti al Facade
         List<Project> projects = jTimeManager.getAllProjects();
-
-        // 2. Chiediamo al Facade di sincronizzare tutto internamente.
-        // Passiamo la lista dei progetti così il manager può riempirli con i task corretti.
         jTimeManager.syncData(projects);
-
-        // 3. Ora visualizziamo i progetti (che il manager ha appena popolato)
         projectsTable.setItems(FXCollections.observableArrayList(projects));
-        projectsTable.refresh();
     }
 
     private void showStatus(String msg, boolean isError) {
         messageLabel.setText(msg);
         messageLabel.setStyle(isError ? "-fx-text-fill: #e74c3c;" : "-fx-text-fill: #2ecc71;");
+        javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(3));
+        pause.setOnFinished(e -> messageLabel.setText(""));
+        pause.play();
     }
 
     @FXML

@@ -48,7 +48,7 @@ public class TasksView implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         initManagers();
         configureTableColumns();
-        setupInitialUI();
+        setupInitialState();
         refreshTable();
     }
 
@@ -154,7 +154,7 @@ public class TasksView implements Initializable {
         });
     }
 
-    private void setupInitialUI() {
+    private void setupInitialState() {
         dueDatePicker.setValue(LocalDate.now());
         setupComboBoxes();
     }
@@ -185,11 +185,10 @@ public class TasksView implements Initializable {
                     Double.parseDouble(durationField.getText().replace(",", ".")));
             newTask.setScheduledDate(dueDatePicker.getValue());
 
-            // Delega al manager l'associazione corretta tra task e progetto (se selezionato)
             jTimeManager.addNewTaskToProject(projectComboBox.getValue(), newTask);
 
-            showStatus("Task salvata!", false);
             handleClearForm();
+            showStatus("Task salvata!", false);
             refreshTable();
         } catch (NumberFormatException e) {
             showStatus("Errore: Durata non valida.", true);
@@ -198,9 +197,24 @@ public class TasksView implements Initializable {
         }
     }
 
+     private boolean validateInput() {
+        if (taskNameField.getText().trim().isEmpty() || durationField.getText().trim().isEmpty() || dueDatePicker.getValue() == null) {
+            showStatus("Errore: Campi obbligatori mancanti.", true);
+            return false;
+        }
+        return true;
+    }
+
+    @FXML
+    private void handleClearForm() {
+        taskNameField.clear();
+        durationField.clear();
+        dueDatePicker.setValue(LocalDate.now());
+        projectComboBox.getSelectionModel().clearSelection();
+    }
+
     @FXML
     private void applyFilters() {
-        // La View chiede i dati già sincronizzati al Facade
         List<Task> allTasks = jTimeManager.getAllSyncedTasks();
 
         String filterProject = projectFilter.getValue();
@@ -218,9 +232,12 @@ public class TasksView implements Initializable {
                 .collect(Collectors.toList());
 
         tasksTable.setItems(FXCollections.observableArrayList(filtered));
-        tasksTable.refresh();
     }
-
+    /**
+     * Ripristina i filtri di ricerca allo stato iniziale.
+     * Svuota i campi di testo, resetta le selezioni dei filtri
+     * e ricarica l'elenco completo dei dati nella tabella.
+     */
     @FXML private void resetFilters() {
         startDatePicker.setValue(null);
         endDatePicker.setValue(null);
@@ -228,36 +245,21 @@ public class TasksView implements Initializable {
         refreshTable();
     }
 
+    /**
+     * Aggiorna i menu a tendina dei progetti e ricarica i dati della tabella
+     * applicando i filtri correnti.
+     */
     private void refreshTable() {
         setupComboBoxes();
         applyFilters();
     }
 
-    // --- Metodi Utility ---
-
-    @FXML private void handleClearProjectSelection() {
-        projectComboBox.getSelectionModel().clearSelection();
-    }
-
-    @FXML private void handleClearForm() {
-        taskNameField.clear();
-        durationField.clear();
-        dueDatePicker.setValue(LocalDate.now());
-        projectComboBox.getSelectionModel().clearSelection();
-        messageLabel.setText("");
-    }
-
-    private boolean validateInput() {
-        if (taskNameField.getText().trim().isEmpty() || durationField.getText().trim().isEmpty() || dueDatePicker.getValue() == null) {
-            showStatus("Errore: Campi obbligatori mancanti.", true);
-            return false;
-        }
-        return true;
-    }
-
     private void showStatus(String msg, boolean isError) {
         messageLabel.setText(msg);
         messageLabel.setStyle(isError ? "-fx-text-fill: #e74c3c;" : "-fx-text-fill: #27ae60;");
+        javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(3));
+        pause.setOnFinished(e -> messageLabel.setText(""));
+        pause.play();
     }
 
     @FXML
