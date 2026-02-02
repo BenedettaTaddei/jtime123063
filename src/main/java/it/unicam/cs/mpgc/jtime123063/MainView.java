@@ -64,8 +64,8 @@ public class MainView implements Initializable {
         changeScene(event, "/TasksView.fxml", "Lista Attività");
     }
 
-//    @FXML
-//    public void goToReportView(ActionEvent event) throws IOException {
-//        changeScene(event, "/ReportView.fxml", "Statistiche e Report");
-//    }
+    @FXML
+    public void goToReportsView(ActionEvent event) throws IOException {
+        changeScene(event, "/ReportsView.fxml", "Statistiche e Report");
+    }
 }

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox prefHeight="650.0" prefWidth="950.0" spacing="10"
+      style="-fx-background-color: #f5f7fa; -fx-padding: 15;"
+      xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="it.unicam.cs.mpgc.jtime123063.ReportsView">
+
+    <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: #f5f7fa; -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
+        <content>
+            <VBox spacing="20" style="-fx-padding: 0 10 10 0;">
+                <children>
+
+                    <VBox style="-fx-background-color: white; -fx-background-radius: 6; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 1);">
+                        <children>
+                            <Label alignment="CENTER" maxWidth="Infinity"
+                                   style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-padding: 0 0 5 0;"
+                                   text="PIANIFICAZIONE E REPORT" />
+
+                            <Label alignment="CENTER" maxWidth="Infinity"
+                                   style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d; -fx-padding: 0 0 15 0;"
+                                   text="Configura i filtri o clicca direttamente su 'Genera' per la timeline globale" />
+
+                            <GridPane hgap="15.0" vgap="15.0">
+                                <columnConstraints>
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="120.0" prefWidth="150.0" />
+                                    <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="120.0" prefWidth="150.0" />
+                                    <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
+                                </columnConstraints>
+                                <children>
+                                    <VBox spacing="2" GridPane.columnIndex="0">
+                                        <Label style="-fx-font-weight: bold;" text="Progetto:" />
+                                        <Label style="-fx-font-size: 10px; -fx-text-fill: #95a5a6;" text="(Opzionale)" />
+                                    </VBox>
+
+                                    <ComboBox fx:id="projectSelector" maxWidth="Infinity" promptText="Tutti i Progetti e Task Singole" GridPane.columnIndex="1" />
+
+                                    <Label style="-fx-font-weight: bold;" text="Intervallo:" GridPane.columnIndex="2" />
+                                    <HBox spacing="10" alignment="CENTER_LEFT" GridPane.columnIndex="3">
+                                        <DatePicker fx:id="startDate" promptText="Inizio" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                                        <Label text="al" />
+                                        <DatePicker fx:id="endDate" promptText="Fine" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                                    </HBox>
+                                </children>
+                            </GridPane>
+
+                            <HBox alignment="CENTER" spacing="20.0">
+                                <padding><Insets top="25.0" /></padding>
+                                <children>
+                                    <Button onAction="#generateReport" prefWidth="300.0"
+                                            style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 12; -fx-cursor: hand; -fx-background-radius: 30;"
+                                            text="📊 GENERA TIMELINE COMPLETA" />
+                                </children>
+                            </HBox>
+                        </children>
+                    </VBox>
+
+                    <HBox spacing="15">
+                        <children>
+                            <VBox alignment="CENTER" prefWidth="220" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 6; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 1);" HBox.hgrow="ALWAYS">
+                                <Label text="Attività Totali" style="-fx-text-fill: #7f8c8d; -fx-font-size: 13px;"/>
+                                <Label fx:id="totalTasksLabel" text="0" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+                            </VBox>
+                            <VBox alignment="CENTER" prefWidth="220" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 6; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 1);" HBox.hgrow="ALWAYS">
+                                <Label text="Tempo Pianificato" style="-fx-text-fill: #7f8c8d; -fx-font-size: 13px;"/>
+                                <Label fx:id="totalEstimatedLabel" text="0.0 h" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+                            </VBox>
+                            <VBox alignment="CENTER" prefWidth="220" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 6; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 1);" HBox.hgrow="ALWAYS">
+                                <Label text="Tempo Reale" style="-fx-text-fill: #7f8c8d; -fx-font-size: 13px;"/>
+                                <Label fx:id="totalEffectiveLabel" text="0.0 h" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+                            </VBox>
+                            <VBox alignment="CENTER" prefWidth="220" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 6; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 1);" HBox.hgrow="ALWAYS">
+                                <Label text="Differenza" style="-fx-text-fill: #7f8c8d; -fx-font-size: 13px;" wrapText="true" textAlignment="CENTER"/>
+                                <Label fx:id="varianceLabel" text="0.0 h" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+                            </VBox>
+                        </children>
+                    </HBox>
+
+                    <VBox spacing="10" VBox.vgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 6; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 1);">
+                        <children>
+                            <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="TIMELINE CRONOLOGICA DETTAGLIATA" />
+                            <TextArea fx:id="reportArea" editable="false" prefHeight="350.0"
+                                      style="-fx-font-family: 'Consolas', 'Monospace'; -fx-font-size: 13px; -fx-text-fill: #34495e; -fx-control-inner-background: #fafafa;"
+                                      wrapText="false" VBox.vgrow="ALWAYS" />
+                        </children>
+                    </VBox>
+
+                </children>
+            </VBox>
+        </content>
+    </ScrollPane>
+
+    <HBox alignment="CENTER_LEFT" style="-fx-padding: 10 0 5 0;">
+        <Button onAction="#goToMainView" style="-fx-background-color: #34495e; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 15; -fx-cursor: hand; -fx-background-radius: 5;" text="← Torna alla Home" />
+    </HBox>
+</VBox>
