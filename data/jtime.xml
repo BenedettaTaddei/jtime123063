@@ -4,17 +4,17 @@
     <task completed="true" effectiveTime="3.0" estimatedTime="2.0" id="d2b71563-8815-4d89-a90a-c6b49eb21613" project_id="688c9f63-5818-4ea2-87c9-fa8dedb1e091" scheduledDate="2026-01-28" title="task 4"/>
     <task completed="true" effectiveTime="2.0" estimatedTime="2.0" id="b2ec15e8-eb1a-49ec-b095-779afeadec22" project_id="200e2efa-d369-4cd1-83c0-2b4d27c8edeb" scheduledDate="2026-01-28" title="task 1"/>
     <task completed="true" effectiveTime="1.5" estimatedTime="1.0" id="a1306008-17ca-4bfa-9910-1ce3f316f9d7" project_id="200e2efa-d369-4cd1-83c0-2b4d27c8edeb" scheduledDate="2026-01-28" title="task 2"/>
-    <task completed="true" effectiveTime="1.7" estimatedTime="2.0" id="a81755cd-b803-4bd3-af6b-5d1b7654b376" project_id="a6471f76-fbb5-46d0-80c9-8712d8544fc4" scheduledDate="2026-01-29" title="taskx2"/>
-    <task completed="false" effectiveTime="0.0" estimatedTime="1.0" id="c3cf920e-bc2b-4ffb-9787-024e09015a41" project_id="" scheduledDate="2026-01-29" title="taskprova"/>
     <task completed="false" effectiveTime="0.0" estimatedTime="1.0" id="e8b8253f-bac7-4e08-bba0-6473fa0af90c" project_id="a6c3f1a0-a512-4fa2-a455-bf9fd9258b30" scheduledDate="2026-01-29" title="taskprova1"/>
     <task completed="false" effectiveTime="0.0" estimatedTime="2.0" id="8ba49bac-f266-46e3-8949-cd7cdd311e74" project_id="" scheduledDate="2026-01-28" title="task 3"/>
     <task completed="false" effectiveTime="0.0" estimatedTime="1.0" id="b102e70b-9ce8-415c-a685-18fff262b854" project_id="" scheduledDate="2026-01-30" title="task"/>
-    <task completed="true" effectiveTime="2.5" estimatedTime="2.0" id="8323b404-5b65-4145-ac8b-4b2afd4de0ce" project_id="a6c3f1a0-a512-4fa2-a455-bf9fd9258b30" scheduledDate="2026-01-30" title="adddd"/>
+    <task completed="false" effectiveTime="0.0" estimatedTime="2.0" id="a81755cd-b803-4bd3-af6b-5d1b7654b376" project_id="" scheduledDate="2026-01-29" title="taskx2"/>
+    <task completed="true" effectiveTime="1.5" estimatedTime="1.0" id="c3cf920e-bc2b-4ffb-9787-024e09015a41" project_id="" scheduledDate="2026-01-29" title="taskprova"/>
+    <task completed="true" effectiveTime="2.5" estimatedTime="2.0" id="9e8e972f-16ea-4b8e-82d6-ea7b67f591e8" project_id="a6c3f1a0-a512-4fa2-a455-bf9fd9258b30" scheduledDate="2026-02-02" title="task 1.0"/>
   </tasks_store>
   <projects_store>
     <project closed="false" id="200e2efa-d369-4cd1-83c0-2b4d27c8edeb" name="progetto 1"/>
     <project closed="false" id="509bcf80-c35c-43ca-b5a4-4f273c531374" name="prog"/>
-    <project closed="false" id="a6c3f1a0-a512-4fa2-a455-bf9fd9258b30" name="progetto3"/>
     <project closed="false" id="72202eed-aa4a-488e-804d-54018433a637" name="progetto"/>
+    <project closed="false" id="a6c3f1a0-a512-4fa2-a455-bf9fd9258b30" name="progetto3"/>
   </projects_store>
 </jtime>

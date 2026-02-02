@@ -52,7 +52,7 @@
                                 <padding><Insets top="25.0" /></padding>
                                 <children>
                                     <Button onAction="#generateReport" prefWidth="300.0"
-                                            style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 12; -fx-cursor: hand; -fx-background-radius: 30;"
+                                            style="-fx-background-color: #9b59b6; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 12; -fx-cursor: hand; -fx-background-radius: 30;"
                                             text="📊 GENERA TIMELINE COMPLETA" />
                                 </children>
                             </HBox>

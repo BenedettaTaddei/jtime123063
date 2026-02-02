@@ -35,7 +35,7 @@
                                 <padding><Insets top="20.0" /></padding>
                                 <children>
                                     <Button onAction="#handleAddProject" prefWidth="250.0"
-                                            style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10; -fx-cursor: hand;"
+                                            style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10; -fx-cursor: hand;"
                                             text="📁 CREA PROGETTO" />
                                 </children>
                             </HBox>

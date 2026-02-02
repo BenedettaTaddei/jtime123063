@@ -71,9 +71,9 @@
                     <children>
                         <VBox alignment="CENTER" spacing="10.0" HBox.hgrow="ALWAYS">
                             <children>
-                                <Label text="ANALISI" textFill="#7f8c8d" style="-fx-font-weight: bold;" />
+                                <Label text="ANALISI" textFill="#9b59b6" style="-fx-font-weight: bold;" />
                                 <Button onAction="#goToReportsView" prefWidth="400.0"
-                                        style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-background-radius: 30; -fx-cursor: hand; -fx-font-weight: bold;"
+                                        style="-fx-background-color: #9b59b6; -fx-text-fill: white; -fx-background-radius: 30; -fx-cursor: hand; -fx-font-weight: bold;"
                                         text="Visualizza Report e Tempi">
                                     <padding><Insets bottom="12.0" left="20.0" right="20.0" top="12.0" /></padding>
                                 </Button>
