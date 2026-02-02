@@ -1,5 +1,10 @@
-package it.unicam.cs.mpgc.jtime123063;
+package it.unicam.cs.mpgc.jtime123063.controller;
 
+import it.unicam.cs.mpgc.jtime123063.manager.*;
+import it.unicam.cs.mpgc.jtime123063.model.Project;
+import it.unicam.cs.mpgc.jtime123063.model.Task;
+import it.unicam.cs.mpgc.jtime123063.repository.XmlSimpleProjectRepository;
+import it.unicam.cs.mpgc.jtime123063.repository.XmlSimpleTaskRepository;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -21,12 +26,15 @@ import java.util.stream.Collectors;
 
 public class ReportsView implements Initializable {
 
-    @FXML private ComboBox<String> projectSelector;
+
+    @FXML
+    private ComboBox<String> projectSelector;
     @FXML private DatePicker startDate, endDate;
     @FXML private Label totalTasksLabel, totalEstimatedLabel, totalEffectiveLabel, varianceLabel;
     @FXML private TextArea reportArea;
 
     private JTimeManager jTimeManager;
+    private ReportManager reportManager; // Campo aggiunto
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -34,7 +42,40 @@ public class ReportsView implements Initializable {
         TaskManager tMan = new SimpleTaskManager(new XmlSimpleTaskRepository());
         this.jTimeManager = new JTimeManager(pMan, tMan);
 
+        // Inizializziamo il manager della logica
+        this.reportManager = new ReportManager();
+
         setupComboBox();
+    }
+
+    @FXML
+    private void generateReport() {
+        jTimeManager.syncData(jTimeManager.getAllProjects());
+
+        // DELEGA: Chiediamo al ReportManager di filtrare i dati
+        List<Task> filteredTasks = reportManager.getFilteredTasks(
+                jTimeManager.getAllSyncedTasks(),
+                projectSelector.getValue(),
+                startDate.getValue(),
+                endDate.getValue()
+        );
+
+        updateUI(filteredTasks);
+    }
+
+    private void updateUI(List<Task> tasks) {
+        // DELEGA: I calcoli sono fatti dal ReportManager
+        double est = tasks.stream().mapToDouble(Task::getEstimatedTime).sum();
+        double eff = tasks.stream().mapToDouble(Task::getEffectiveTime).sum();
+        double diff = reportManager.getTotalVariance(tasks);
+
+        totalTasksLabel.setText(String.valueOf(tasks.size()));
+        totalEstimatedLabel.setText(String.format("%.1f h", est));
+        totalEffectiveLabel.setText(String.format("%.1f h", eff));
+        varianceLabel.setText(String.format("%+.1f h", diff));
+
+        applyVarianceColor(diff);
+        updateTimeline(tasks);
     }
 
     private void setupComboBox() {
@@ -44,42 +85,6 @@ public class ReportsView implements Initializable {
         projectNames.add(0, "Tutti i Progetti");
         projectSelector.setItems(FXCollections.observableArrayList(projectNames));
         projectSelector.getSelectionModel().selectFirst();
-    }
-
-    @FXML
-    private void generateReport() {
-        String selected = projectSelector.getValue();
-        LocalDate start = startDate.getValue();
-        LocalDate end = endDate.getValue();
-
-        jTimeManager.syncData(jTimeManager.getAllProjects());
-
-        List<Task> filteredTasks = jTimeManager.getAllSyncedTasks().stream()
-                .filter(t -> selected.equals("Tutti i Progetti") ||
-                        (t.getParentProject() != null && t.getParentProject().getName().equals(selected)))
-                .filter(t -> {
-                    LocalDate d = t.getScheduledDate();
-                    if (d == null) return (start == null && end == null);
-                    return (start == null || !d.isBefore(start)) && (end == null || !d.isAfter(end));
-                })
-                .collect(Collectors.toList());
-
-        updateUI(filteredTasks);
-    }
-
-    private void updateUI(List<Task> tasks) {
-        double est = tasks.stream().mapToDouble(Task::getEstimatedTime).sum();
-        double eff = tasks.stream().mapToDouble(Task::getEffectiveTime).sum();
-        double diff = eff - est;
-
-        totalTasksLabel.setText(String.valueOf(tasks.size()));
-        totalEstimatedLabel.setText(String.format("%.1f h", est));
-        totalEffectiveLabel.setText(String.format("%.1f h", eff));
-        varianceLabel.setText(String.format("%+.1f h", diff));
-
-        // Abbiamo rimosso 'baseStyle' perché lo passiamo solo una volta
-        applyVarianceColor(diff);
-        updateTimeline(tasks);
     }
 
     private void applyVarianceColor(double diff) {

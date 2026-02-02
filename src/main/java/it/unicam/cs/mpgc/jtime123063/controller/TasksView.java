@@ -1,5 +1,11 @@
-package it.unicam.cs.mpgc.jtime123063;
+package it.unicam.cs.mpgc.jtime123063.controller;
 
+import it.unicam.cs.mpgc.jtime123063.manager.*;
+import it.unicam.cs.mpgc.jtime123063.model.Project;
+import it.unicam.cs.mpgc.jtime123063.model.SimpleTask;
+import it.unicam.cs.mpgc.jtime123063.model.Task;
+import it.unicam.cs.mpgc.jtime123063.repository.XmlSimpleProjectRepository;
+import it.unicam.cs.mpgc.jtime123063.repository.XmlSimpleTaskRepository;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;

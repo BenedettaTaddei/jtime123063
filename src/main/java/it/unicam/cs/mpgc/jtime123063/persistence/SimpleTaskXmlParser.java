@@ -1,5 +1,7 @@
-package it.unicam.cs.mpgc.jtime123063;
+package it.unicam.cs.mpgc.jtime123063.persistence;
 
+import it.unicam.cs.mpgc.jtime123063.model.SimpleTask;
+import it.unicam.cs.mpgc.jtime123063.model.Task;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import java.time.LocalDate;

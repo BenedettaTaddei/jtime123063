@@ -1,4 +1,7 @@
-package it.unicam.cs.mpgc.jtime123063;
+package it.unicam.cs.mpgc.jtime123063.manager;
+
+import it.unicam.cs.mpgc.jtime123063.model.Project;
+import it.unicam.cs.mpgc.jtime123063.repository.ProjectRepository;
 
 import java.util.List;
 

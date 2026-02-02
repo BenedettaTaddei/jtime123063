@@ -1,4 +1,4 @@
-package it.unicam.cs.mpgc.jtime123063;
+package it.unicam.cs.mpgc.jtime123063.model;
 
 import java.util.List;
 

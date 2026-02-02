@@ -1,4 +1,6 @@
-package it.unicam.cs.mpgc.jtime123063;
+package it.unicam.cs.mpgc.jtime123063.manager;
+
+import it.unicam.cs.mpgc.jtime123063.model.Task;
 
 import java.util.List;
 

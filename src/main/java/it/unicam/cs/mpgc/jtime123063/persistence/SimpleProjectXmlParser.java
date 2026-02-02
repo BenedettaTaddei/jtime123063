@@ -1,5 +1,7 @@
-package it.unicam.cs.mpgc.jtime123063;
+package it.unicam.cs.mpgc.jtime123063.persistence;
 
+import it.unicam.cs.mpgc.jtime123063.model.Project;
+import it.unicam.cs.mpgc.jtime123063.model.SimpleProject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 

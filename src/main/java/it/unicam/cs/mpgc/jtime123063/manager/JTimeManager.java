@@ -1,4 +1,9 @@
-package it.unicam.cs.mpgc.jtime123063;
+package it.unicam.cs.mpgc.jtime123063.manager;
+
+import it.unicam.cs.mpgc.jtime123063.model.Project;
+import it.unicam.cs.mpgc.jtime123063.model.SimpleProject;
+import it.unicam.cs.mpgc.jtime123063.model.Task;
+import it.unicam.cs.mpgc.jtime123063.repository.XmlSimpleTaskRepository;
 
 import java.time.LocalDate;
 import java.util.List;

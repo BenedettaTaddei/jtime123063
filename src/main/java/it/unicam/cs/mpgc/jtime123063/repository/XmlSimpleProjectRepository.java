@@ -1,5 +1,10 @@
-package it.unicam.cs.mpgc.jtime123063;
+package it.unicam.cs.mpgc.jtime123063.repository;
 
+import it.unicam.cs.mpgc.jtime123063.model.Project;
+import it.unicam.cs.mpgc.jtime123063.persistence.SimpleProjectXmlParser;
+import it.unicam.cs.mpgc.jtime123063.persistence.XmlDocManager;
+import it.unicam.cs.mpgc.jtime123063.persistence.XmlParser;
+import it.unicam.cs.mpgc.jtime123063.persistence.XmlSectionExtractor;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;

@@ -1,5 +1,10 @@
-package it.unicam.cs.mpgc.jtime123063;
+package it.unicam.cs.mpgc.jtime123063.controller;
 
+import it.unicam.cs.mpgc.jtime123063.manager.*;
+import it.unicam.cs.mpgc.jtime123063.repository.ProjectRepository;
+import it.unicam.cs.mpgc.jtime123063.repository.TaskRepository;
+import it.unicam.cs.mpgc.jtime123063.repository.XmlSimpleProjectRepository;
+import it.unicam.cs.mpgc.jtime123063.repository.XmlSimpleTaskRepository;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -12,7 +17,6 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Objects;
 import java.util.ResourceBundle;
 
 public class MainView implements Initializable {
