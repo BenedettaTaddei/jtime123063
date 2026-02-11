@@ -6,6 +6,10 @@ import java.util.List;
 import java.util.UUID;
 import java.util.Objects;
 
+/**
+ * Standard implementation of the Project interface.
+ * Manages a collection of tasks and handles state transitions for project closure.
+ */
 public class SimpleProject implements Project {
     private final String id;
     private String name;
@@ -13,7 +17,9 @@ public class SimpleProject implements Project {
     private boolean closed;
 
     /**
-     * Costruttore per nuovi progetti (genera UUID).
+     * Constructor for new projects with a generated unique ID.
+     * @param name The name of the project.
+     * @throws IllegalArgumentException if name is null or empty.
      */
     public SimpleProject(String name) {
         if (name == null || name.trim().isEmpty()) {
@@ -26,7 +32,10 @@ public class SimpleProject implements Project {
     }
 
     /**
-     * Costruttore per la persistenza (mantiene l'ID originale).
+     * Constructor for project persistence and reconstruction.
+     * @param id   The existing project ID.
+     * @param name The project name.
+     * @throws IllegalArgumentException if id or name are null/empty.
      */
     public SimpleProject(String id, String name) {
         if (id == null || id.trim().isEmpty()) {
@@ -63,6 +72,7 @@ public class SimpleProject implements Project {
     public List<Task> getTasks() {
         return Collections.unmodifiableList(tasks);
     }
+
     @Override
     public int getTaskCount() {
         return tasks.size();
@@ -110,9 +120,6 @@ public class SimpleProject implements Project {
 
     @Override
     public double getTotalEstimatedTime() {
-//        if (tasks == null || tasks.isEmpty()) {
-//            return 0.0;
-//        }
         return tasks.stream().mapToDouble(Task::getEstimatedTime).sum();
     }
 
@@ -121,19 +128,14 @@ public class SimpleProject implements Project {
         return tasks.stream().mapToDouble(Task::getEffectiveTime).sum();
     }
 
-    /**
-     * Calcola la percentuale di avanzamento in base ai task completati.
-     */
+    @Override
     public double getCompletionPercentage() {
         if (tasks.isEmpty()) return 0.0;
         long completedCount = tasks.stream().filter(Task::isCompleted).count();
         return (double) completedCount / tasks.size() * 100.0;
     }
 
-    /**
-     * Un progetto è considerato "Completato" logicamente se tutti i task lo sono,
-     * indipendentemente dal flag 'closed' amministrativo.
-     */
+    @Override
     public boolean isCompleted() {
         return !tasks.isEmpty() && tasks.stream().allMatch(Task::isCompleted);
     }
@@ -150,8 +152,9 @@ public class SimpleProject implements Project {
     public int hashCode() { return Objects.hash(id); }
 
     /**
-     * Metodo tecnico usato dal Manager durante il caricamento XML.
-     * Permette di ricostruire i legami anche se il progetto è già chiuso.
+     * Technical method used during XML loading to reconstruct task-project links
+     * even if the project is already closed.
+     * @param task The task to load.
      */
     public void loadTask(Task task) {
         if (task == null) return;
@@ -160,6 +163,7 @@ public class SimpleProject implements Project {
         }
         task.setParentProject(this);
     }
+
     @Override
     public String toString() {
         return this.name;
@@ -169,5 +173,4 @@ public class SimpleProject implements Project {
     public void clearTasks() {
         this.tasks.clear();
     }
-
 }

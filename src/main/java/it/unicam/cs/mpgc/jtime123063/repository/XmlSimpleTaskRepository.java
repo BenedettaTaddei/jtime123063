@@ -30,11 +30,9 @@ public class XmlSimpleTaskRepository implements TaskRepository {
         if (task == null) return;
         try {
             remove(task);
-
             Document doc = xmlDocManager.loadDocument();
             // Chiediamo al parser il nome della sezione
             Element section = sectionExtractor.getOrCreateSection(doc, taskParser.getSectionName());
-
             section.appendChild(taskParser.toXml(task, doc));
             xmlDocManager.saveDocument(doc);
         } catch (Exception e) {
@@ -72,14 +70,12 @@ public class XmlSimpleTaskRepository implements TaskRepository {
             NodeList nodes = sectionExtractor.getElementsInSection(taskParser.getSectionName(), taskParser.getElementName());
             for (int i = 0; i < nodes.getLength(); i++) {
                 Element el = (Element) nodes.item(i);
-
                 // LEGGI L'ID E SALVALO NELLA MAPPA
                 String tid = el.getAttribute("id");
                 String pid = el.getAttribute("project_id");
                 if (!pid.isEmpty()) {
                     taskToProjectMap.put(tid, pid);
                 }
-
                 allTasks.add(taskParser.fromXml(el));
             }
         } catch (Exception e) { /* ... */ }
@@ -99,6 +95,7 @@ public class XmlSimpleTaskRepository implements TaskRepository {
             System.err.println("Errore CLEAR_ALL: " + e.getMessage());
         }
     }
+
     public String getProjectIdForTask(String taskId) {
         if (taskId == null) return null;
         // Deve usare ESATTAMENTE il nome della variabile che hai visto nel debug

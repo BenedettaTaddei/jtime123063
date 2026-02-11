@@ -3,100 +3,102 @@ package it.unicam.cs.mpgc.jtime123063.model;
 import java.util.List;
 
 /**
- * Rappresenta un progetto composto da un insieme di attività (task).
- * Un progetto agisce come contenitore logico e definisce le regole di business
- * per la gestione del ciclo di vita delle attività, inclusa la validazione
- * dello stato di chiusura.
+ * Represents a project composed of a set of tasks.
  */
 public interface Project {
 
     /**
-     * Restituisce l'identificativo univoco del progetto.
-     *
-     * @return l'ID del progetto come String
+     * Gets the unique identifier of the project.
+     * @return The project ID as a String.
      */
     String getId();
 
     /**
-     * Restituisce il nome del progetto.
-     *
-     * @return il nome del progetto
+     * Gets the project name.
+     * @return The name of the project.
      */
     String getName();
 
     /**
-     * Imposta il nome del progetto.
-     *
-     * @param name il nuovo nome del progetto, non può essere nullo o vuoto
-     * @throws IllegalArgumentException se il nome è nullo o composto solo da spazi
+     * Sets the project name.
+     * @param name The new project name; cannot be null or empty.
+     * @throws IllegalArgumentException if the name is null or blank.
      */
     void setName(String name);
 
     /**
-     * Restituisce la lista dei task associati al progetto.
-     * La lista restituita dovrebbe essere una vista non modificabile per garantire l'incapsulamento.
-     *
-     * @return lista dei task associati
+     * Returns an unmodifiable view of the tasks associated with the project.
+     * @return A list of associated tasks.
      */
     List<Task> getTasks();
 
+    /**
+     * Gets the total number of tasks in the project.
+     * @return The task count.
+     */
     int getTaskCount();
 
     /**
-     * Aggiunge un'attività esistente a questo progetto e ne stabilisce il legame gerarchico.
-     * <p>
-     * L'operazione è bidirezionale: l'attività viene inserita nella lista interna del progetto
-     * e il progetto stesso viene impostato come "parent" dell'attività.
-     * </p>
-     *
-     * @param task l'attività da associare a questo progetto
-     * @throws IllegalArgumentException se il task fornito è {@code null}
-     * @throws IllegalStateException se il progetto è chiuso e non può accettare nuove attività
+     * Adds an existing task to this project and establishes a bidirectional link.
+     * @param task The task to associate with this project.
+     * @throws IllegalArgumentException if the task is null.
+     * @throws IllegalStateException if the project is closed and cannot accept new tasks.
      */
     void addParentTask(Task task);
 
     /**
-     * Rimuove il legame tra questo progetto e l'attività specificata.
-     * L'attività non viene eliminata dal sistema, ma diventa un'attività "libera".
-     *
-     * @param task l'attività da scollegare dal progetto
-     * @throws IllegalStateException se il progetto è chiuso
+     * Removes the link between this project and the specified task.
+     * The task is not deleted but becomes "unassigned".
+     * @param task The task to disconnect.
+     * @throws IllegalStateException if the project is closed.
      */
     void removeParentTask(Task task);
 
     /**
-     * Verifica se il progetto è attualmente nello stato chiuso.
-     *
-     * @return true se il progetto è chiuso, false se è attivo
+     * Checks if the project is currently in a closed state.
+     * @return true if closed, false if active.
      */
     boolean isClosed();
 
     /**
-     * Tenta di cambiare lo stato di chiusura del progetto.
-     * La chiusura è consentita solo se non vi sono attività pendenti.
-     *
-     * @param closed true per tentare di chiudere il progetto, false per riaprirlo
-     * @throws IllegalStateException se si tenta di chiudere il progetto (closed=true)
-     * mentre canBeClosed() restituisce false
+     * Attempts to change the project's closure state.
+     * @param closed true to close the project, false to reopen it.
+     * @throws IllegalStateException if attempting to close while canBeClosed() is false.
      */
     void setClosed(boolean closed);
 
     /**
-     * Verifica se il progetto soddisfa i requisiti necessari per essere chiuso.
-     * Secondo la specifica, un progetto è chiudibile solo se tutte le attività
-     * associate risultano completate.
-     *
-     * @return true se tutti i task sono completati, false se esiste almeno un task pendente
+     * Verifies if the project meets the requirements for closure.
+     * @return true if all tasks are completed or list is empty, false otherwise.
      */
     boolean canBeClosed();
 
+    /**
+     * Calculates the sum of estimated hours for all tasks in the project.
+     * @return Total estimated time.
+     */
     double getTotalEstimatedTime();
 
+    /**
+     * Calculates the sum of effective hours spent on all tasks in the project.
+     * @return Total effective time.
+     */
     double getTotalEffectiveTime();
 
+    /**
+     * Calculates the completion percentage based on the number of completed tasks.
+     * @return A value between 0.0 and 100.0.
+     */
     double getCompletionPercentage();
 
+    /**
+     * Logical check to see if all tasks are completed.
+     * @return true if there is at least one task and all are completed.
+     */
     boolean isCompleted();
 
+    /**
+     * Removes all tasks from the project.
+     */
     void clearTasks();
 }

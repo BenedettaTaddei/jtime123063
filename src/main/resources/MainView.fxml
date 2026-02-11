@@ -12,7 +12,7 @@
 
 <VBox alignment="CENTER" prefHeight="600.0" prefWidth="900.0" spacing="30.0"
       style="-fx-background-color: #f0f2f5;"
-      xmlns="http://javafx.com/javafx/21.0.8" xmlns:fx="http://javafx.com/fxml/1"
+      xmlns:fx="http://javafx.com/fxml"
       fx:controller="it.unicam.cs.mpgc.jtime123063.controller.MainView">
 
     <children>

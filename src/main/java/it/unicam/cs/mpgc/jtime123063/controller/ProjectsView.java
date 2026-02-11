@@ -28,8 +28,7 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 /**
- * Controller per la gestione dei Progetti.
- * Utilizza esclusivamente JTimeManager come Facade per l'accesso ai dati sincronizzati.
+ * Controller for managing Projects views and interactions.
  */
 public class ProjectsView implements Initializable {
 
@@ -49,6 +48,11 @@ public class ProjectsView implements Initializable {
 
     private JTimeManager jTimeManager;
 
+    /**
+     * Initializes the controller, managers, and UI components.
+     * @param location  The FXML location.
+     * @param resources The resource bundle.
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         initManagers();
@@ -57,13 +61,18 @@ public class ProjectsView implements Initializable {
         refreshTable();
     }
 
+    /**
+     * Initializes the business logic managers with XML repositories.
+     */
     private void initManagers() {
-        // I manager di basso livello sono creati localmente e passati al Facade
         ProjectManager pMan = new SimpleProjectManager(new XmlSimpleProjectRepository());
         TaskManager tMan = new SimpleTaskManager(new XmlSimpleTaskRepository());
         this.jTimeManager = new JTimeManager(pMan, tMan);
     }
 
+    /**
+     * Configures the table columns and their data binding logic.
+     */
     private void configureTableColumns() {
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         taskCountColumn.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().
@@ -79,55 +88,33 @@ public class ProjectsView implements Initializable {
         setupDeleteColumn();
     }
 
+    /**
+     * Sets up the interactive delete column with custom cell rendering.
+     */
     private void setupDeleteColumn() {
-        deleteColumn.setMinWidth(80);
-        deleteColumn.setResizable(false);
-        deleteColumn.setCellFactory(param -> new TableCell<>() {
-            private final Button btnDelete = new Button("🗑");
-            {
-                btnDelete.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-cursor: hand;");
-                btnDelete.setOnAction(event -> {
-                    Project project =  getTableRow().getItem();
-                    if (project != null) {
-                        // Alert di conferma
-                        Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
-                                "Eliminare il progetto '" + project.getName() + "'? I task associati rimarranno come task libere.",
-                                ButtonType.YES, ButtonType.NO);
-
-                        alert.showAndWait().ifPresent(response -> {
-                            if (response == ButtonType.YES) {
-                                jTimeManager.removeProjectPermanently(project);
-                                refreshTable();
-                                showStatus("Progetto eliminato.", false);
-                            }
-                        });
-                    }
-                });
-            }
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || getTableRow() == null || getTableRow().getItem() == null) {
-                    setGraphic(null);
-                } else {
-                    setGraphic(btnDelete);
-                    setStyle("-fx-alignment: CENTER;");
-                }
-            }
-        });
+        deleteColumn.setCellFactory(param -> new DeleteProjectCell(jTimeManager, this::refreshTable));
     }
 
+    /**
+     * Configures the initial state of UI elements.
+     */
     private void setupInitialState() {
         setupComboBoxes();
     }
 
+    /**
+     * Populates the status filter combo box.
+     */
     private void setupComboBoxes() {
         statusFilter.getItems().setAll("Tutti", "In Corso", "Completati");
-
         if (statusFilter.getSelectionModel().isEmpty()) {
             statusFilter.getSelectionModel().selectFirst();
         }
     }
+
+    /**
+     * Handles the creation and saving of a new project.
+     */
     @FXML
     private void handleAddProject() {
         if (!validateInput()) return;
@@ -137,36 +124,43 @@ public class ProjectsView implements Initializable {
             jTimeManager.saveProject(newProject);
 
             handleClearForm();
-            showStatus("Progetto creato con successo!", false);
+            showStatus("Project created successfully!", false);
             refreshTable();
         } catch (Exception e) {
-            showStatus("Errore durante il salvataggio!", true);
+            showStatus("Error during save operation!", true);
         }
     }
+
     /**
-     * Verifica che i dati inseriti nel modulo progetto siano validi.
-     * @return true se il nome è presente, false altrimenti.
+     * Validates that the project input fields are correctly filled.
+     * @return true if input is valid, false otherwise.
      */
     private boolean validateInput() {
         if (projectNameField.getText().trim().isEmpty()) {
-            showStatus("Errore: Il nome del progetto è obbligatorio.", true);
+            showStatus("Error: Project name is mandatory.", true);
             return false;
         }
         return true;
     }
 
+    /**
+     * Clears the project input fields.
+     */
     @FXML
     private void handleClearForm() {
         projectNameField.clear();
     }
 
+    /**
+     * Filters the projects table based on search query and status.
+     */
     @FXML
     private void applyFilters() {
         String query = searchBar.getText().toLowerCase();
         String status = statusFilter.getValue();
 
-        jTimeManager.getAllSyncedTasks();
         List<Project> allProjects = jTimeManager.getAllProjects();
+        jTimeManager.syncData(allProjects);
 
         List<Project> filtered = allProjects.stream()
                 .filter(p -> p.getName().toLowerCase().contains(query))
@@ -179,10 +173,9 @@ public class ProjectsView implements Initializable {
 
         projectsTable.setItems(FXCollections.observableArrayList(filtered));
     }
+
     /**
-     * Ripristina i filtri di ricerca allo stato iniziale.
-     * Svuota i campi di testo, resetta le selezioni dei filtri
-     * e ricarica l'elenco completo dei dati nella tabella.
+     * Resets search filters and reloads all projects.
      */
     @FXML
     private void resetFilters() {
@@ -191,12 +184,20 @@ public class ProjectsView implements Initializable {
         refreshTable();
     }
 
+    /**
+     * Refreshes the projects table by fetching synced data from the manager.
+     */
     private void refreshTable() {
         List<Project> projects = jTimeManager.getAllProjects();
         jTimeManager.syncData(projects);
         projectsTable.setItems(FXCollections.observableArrayList(projects));
     }
 
+    /**
+     * Displays a status message with specific styling based on error state.
+     * @param msg The message to display.
+     * @param isError True if the message represents an error.
+     */
     private void showStatus(String msg, boolean isError) {
         messageLabel.setText(msg);
         messageLabel.setStyle(isError ? "-fx-text-fill: #e74c3c;" : "-fx-text-fill: #2ecc71;");
@@ -205,10 +206,56 @@ public class ProjectsView implements Initializable {
         pause.play();
     }
 
+
+
+    /**
+     * Inner class representing a custom table cell with a delete button for projects.
+     */
+    private class DeleteProjectCell extends TableCell<Project, Void> {
+        private final Button btnDelete = new Button("🗑");
+
+        public DeleteProjectCell(JTimeManager manager, Runnable onRefresh) {
+            btnDelete.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-cursor: hand;");
+            btnDelete.setOnAction(event -> {
+                Project p = getTableRow().getItem();
+                if (p != null) {
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Delete " + p.getName() + "?", ButtonType.YES, ButtonType.NO);
+                    alert.showAndWait().ifPresent(response -> {
+                        if (response == ButtonType.YES) {
+                            manager.removeProjectPermanently(p);
+                            onRefresh.run();
+                        }
+                    });
+                }
+            });
+        }
+
+        /**
+         * Updates the cell graphic based on row content.
+         */
+        @Override
+        protected void updateItem(Void item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty || getTableRow() == null || getTableRow().getItem() == null) {
+                setGraphic(null);
+            } else {
+                setGraphic(btnDelete);
+                setStyle("-fx-alignment: CENTER;");
+            }
+        }
+    }
+    /**
+     * Navigates back to the main dashboard view.
+     * @param event The action event.
+     */
     @FXML
-    public void goToMainView(ActionEvent event) throws IOException {
-        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/MainView.fxml")));
-        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        stage.setScene(new Scene(root));
+    public void goToMainView(ActionEvent event) {
+        try {
+            Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/MainView.fxml")));
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

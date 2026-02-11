@@ -148,7 +148,6 @@ public class JTimeManager {
         syncData(allTasks, true);
         return allTasks;
     }
-
     public List<Project> getAllProjects() {
         return projectManager.getAllProjects();
     }

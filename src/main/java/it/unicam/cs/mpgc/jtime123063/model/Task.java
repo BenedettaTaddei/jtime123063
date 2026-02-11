@@ -3,109 +3,94 @@ package it.unicam.cs.mpgc.jtime123063.model;
 import java.time.LocalDate;
 
 /**
- * Rappresenta un'attività atomica (task) all'interno di un progetto.
- * Un task permette di tracciare il tempo stimato rispetto a quello effettivo,
- * gestire lo stato di completamento e pianificare l'esecuzione in una data specifica.
+ * Represents an atomic task.
  */
 public interface Task {
 
     /**
-     * Restituisce l'identificativo univoco del task.
-     *
-     * @return l'id del task come String
+     * Gets the unique identifier of the task.
+     * @return The task ID as a String.
      */
     String getId();
 
     /**
-     * Restituisce il titolo del task.
-     *
-     * @return il titolo del task
+     * Gets the task title.
+     * @return The title of the task.
      */
     String getTitle();
 
     /**
-     * Imposta il titolo del task.
-     *
-     * @param title il nuovo titolo, non può essere nullo o vuoto
-     * @throws IllegalArgumentException se il titolo è nullo o composto solo da spazi
+     * Sets the task title.
+     * @param title The new title; cannot be null or empty.
+     * @throws IllegalArgumentException if title is null or blank.
      */
     void setTitle(String title);
 
     /**
-     * Restituisce il tempo stimato per lo svolgimento dell'attività.
-     *
-     * @return il tempo stimato in ore
+     * Gets the estimated time for completion.
+     * @return The estimated time in hours.
      */
     double getEstimatedTime();
 
     /**
-     * Imposta la stima del tempo necessario.
-     *
-     * @param hours il tempo stimato in ore, deve essere non negativo
-     * @throws IllegalArgumentException se hours è minore di 0
+     * Sets the estimated time for the task.
+     * @param hours The estimated time in hours; must be non-negative.
+     * @throws IllegalArgumentException if hours is less than 0.
      */
     void setEstimatedTime(double hours);
 
     /**
-     * Restituisce il tempo effettivamente impiegato per completare l'attività.
-     *
-     * @return il tempo effettivo in ore
+     * Gets the effective time spent on the task.
+     * @return The effective time in hours.
      */
     double getEffectiveTime();
 
     /**
-     * Imposta il tempo effettivamente speso.
-     *
-     * @param hours il tempo speso in ore, deve essere non negativo
-     * @throws IllegalArgumentException se hours è minore di 0
+     * Sets the effective time spent on the task.
+     * @param hours The actual time spent in hours; must be non-negative.
+     * @throws IllegalArgumentException if hours is less than 0.
      */
     void setEffectiveTime(double hours);
 
     /**
-     * Verifica se l'attività è stata completata.
-     *
-     * @return true se il task è completato, false altrimenti
+     * Checks if the task is completed.
+     * @return true if completed, false otherwise.
      */
     boolean isCompleted();
 
     /**
-     * Imposta lo stato di completamento del task.
-     *
-     * @param completed true per segnare come completato, false altrimenti
+     * Sets the completion status of the task.
+     * @param completed true to mark as finished, false otherwise.
      */
     void setCompleted(boolean completed);
 
     /**
-     * Restituisce la data in cui l'attività è stata pianificata.
-     *
-     * @return la data pianificata, o null se non ancora programmata
+     * Gets the scheduled execution date.
+     * @return The scheduled date, or null if not programmed.
      */
     LocalDate getScheduledDate();
 
     /**
-     * Imposta la data di pianificazione per lo svolgimento del task.
-     *
-     * @param date la data pianificata
+     * Sets the scheduled execution date.
+     * @param date The date to perform the task.
      */
     void setScheduledDate(LocalDate date);
 
     /**
-     * Calcola la differenza tra il tempo speso e il tempo stimato.
-     * Un valore positivo indica che si è impiegato più tempo del previsto.
-     * Un valore negativo se l'attività è stata più rapida del previsto
-     *
-     * @return lo scostamento temporale
+     * Calculates the difference between effective and estimated time.
+     * @return The time variance (effective - estimated).
      */
     double getTimeVariance();
+
     /**
-     * Restituisce il progetto a cui appartiene il task.
-     * * @return il progetto genitore, o null se il task è indipendente.
+     * Gets the project this task belongs to.
+     * @return The parent project, or null if independent.
      */
     Project getParentProject();
 
     /**
-     * Imposta il progetto a cui appartiene questo task.
-     * * @param project il progetto genitore
+     * Sets the project this task belongs to.
+     * @param project The parent project.
      */
     void setParentProject(Project project);
 }

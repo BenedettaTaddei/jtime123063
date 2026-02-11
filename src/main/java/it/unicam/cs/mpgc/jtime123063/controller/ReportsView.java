@@ -24,47 +24,53 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
+/**
+ * Controller for generating and displaying project reports and statistics.
+ */
 public class ReportsView implements Initializable {
 
-
-    @FXML
-    private ComboBox<String> projectSelector;
+    @FXML private ComboBox<String> projectSelector;
     @FXML private DatePicker startDate, endDate;
     @FXML private Label totalTasksLabel, totalEstimatedLabel, totalEffectiveLabel, varianceLabel;
     @FXML private TextArea reportArea;
 
     private JTimeManager jTimeManager;
-    private ReportManager reportManager; // Campo aggiunto
+    private ReportManager reportManager;
 
+    /**
+     * Initializes the report view, managers, and UI components.
+     * @param location  The FXML location.
+     * @param resources The resource bundle.
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         ProjectManager pMan = new SimpleProjectManager(new XmlSimpleProjectRepository());
         TaskManager tMan = new SimpleTaskManager(new XmlSimpleTaskRepository());
         this.jTimeManager = new JTimeManager(pMan, tMan);
-
-        // Inizializziamo il manager della logica
         this.reportManager = new ReportManager();
-
         setupComboBox();
     }
 
+    /**
+     * Triggers report generation by filtering tasks based on user input.
+     */
     @FXML
     private void generateReport() {
         jTimeManager.syncData(jTimeManager.getAllProjects());
-
-        // DELEGA: Chiediamo al ReportManager di filtrare i dati
         List<Task> filteredTasks = reportManager.getFilteredTasks(
                 jTimeManager.getAllSyncedTasks(),
                 projectSelector.getValue(),
                 startDate.getValue(),
                 endDate.getValue()
         );
-
         updateUI(filteredTasks);
     }
 
+    /**
+     * Updates the summary labels and the report area with filtered task data.
+     * @param tasks The list of filtered tasks to display.
+     */
     private void updateUI(List<Task> tasks) {
-        // DELEGA: I calcoli sono fatti dal ReportManager
         double est = tasks.stream().mapToDouble(Task::getEstimatedTime).sum();
         double eff = tasks.stream().mapToDouble(Task::getEffectiveTime).sum();
         double diff = reportManager.getTotalVariance(tasks);
@@ -78,6 +84,9 @@ public class ReportsView implements Initializable {
         updateTimeline(tasks);
     }
 
+    /**
+     * Populates the project selection combo box with available project names.
+     */
     private void setupComboBox() {
         List<String> projectNames = jTimeManager.getAllProjects().stream()
                 .map(Project::getName)
@@ -87,54 +96,37 @@ public class ReportsView implements Initializable {
         projectSelector.getSelectionModel().selectFirst();
     }
 
+    /**
+     * Applies semantic coloring to the variance label based on the numerical value.
+     * Red (#e74c3c) = Over-budget, Green (#27ae60) = Saving, Dark Blue (#2c3e50) = Neutral.
+     * @param diff The variance value to evaluate.
+     */
     private void applyVarianceColor(double diff) {
-        // Applichiamo solo il cambio colore, mantenendo i 20px e il bold
         String color = (diff > 0) ? "#e74c3c" : (diff < 0) ? "#27ae60" : "#2c3e50";
         varianceLabel.setStyle("-fx-text-fill: " + color + "; -fx-font-size: 20px; -fx-font-weight: bold;");
     }
 
+    /**
+     * Delegates the timeline string generation to the ReportManager and updates the UI.
+     * @param tasks The list of tasks to format in the timeline.
+     */
     private void updateTimeline(List<Task> tasks) {
-        if (tasks.isEmpty()) {
-            reportArea.setText("\nNessuna attività trovata.");
-            return;
-        }
-
-        StringBuilder sb = new StringBuilder();
-        LocalDate lastDate = null;
-
-        List<Task> sorted = tasks.stream()
-                .sorted((t1, t2) -> {
-                    if (t1.getScheduledDate() == null) return 1;
-                    if (t2.getScheduledDate() == null) return -1;
-                    return t1.getScheduledDate().compareTo(t2.getScheduledDate());
-                }).collect(Collectors.toList());
-
-        for (Task t : sorted) {
-            LocalDate d = t.getScheduledDate();
-            if (d != null && !d.equals(lastDate)) {
-                sb.append(String.format("\n ---------- %s ---------- \n", d));
-                lastDate = d;
-            } else if (d == null && lastDate != null) {
-                sb.append("\n ---------- DA ASSEGNARE ----------\n");
-                lastDate = null;
-            }
-
-            String pInfo = (t.getParentProject() != null) ? "[" + t.getParentProject().getName() + "]" : "[Singola]";
-            sb.append(String.format(" %-22s %-28s | Est: %4.1fh | Eff: %4.1fh\n",
-                    truncate(pInfo, 20), truncate(t.getTitle(), 25), t.getEstimatedTime(), t.getEffectiveTime()));
-        }
-        reportArea.setText(sb.toString());
+        // Logica delegata al manager per alleggerire il controller
+        reportArea.setText(reportManager.getFormattedTimeline(tasks));
     }
 
-    private String truncate(String text, int max) {
-        if (text == null) return "";
-        return (text.length() <= max) ? text : text.substring(0, max - 3) + "...";
-    }
-
+    /**
+     * Navigates back to the main dashboard view.
+     * @param event The action event triggered by the user.
+     */
     @FXML
-    public void goToMainView(ActionEvent event) throws IOException {
-        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/MainView.fxml")));
-        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        stage.setScene(new Scene(root));
+    public void goToMainView(ActionEvent event) {
+        try {
+            Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/MainView.fxml")));
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

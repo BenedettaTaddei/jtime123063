@@ -30,8 +30,7 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 /**
- * Controller per la gestione della vista Task.
- * Implementa la logica di presentazione delegando le operazioni di business a JTimeManager.
+ * Controller for managing Tasks views and interactions.
  */
 public class TasksView implements Initializable {
 
@@ -50,6 +49,11 @@ public class TasksView implements Initializable {
 
     private JTimeManager jTimeManager;
 
+    /**
+     * Initializes the controller, managers, and table configurations.
+     * @param location  The FXML location.
+     * @param resources The resource bundle.
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         initManagers();
@@ -58,12 +62,18 @@ public class TasksView implements Initializable {
         refreshTable();
     }
 
+    /**
+     * Sets up the business logic managers.
+     */
     private void initManagers() {
         ProjectManager projectManager = new SimpleProjectManager(new XmlSimpleProjectRepository());
         TaskManager taskManager = new SimpleTaskManager(new XmlSimpleTaskRepository());
         this.jTimeManager = new JTimeManager(projectManager, taskManager);
     }
 
+    /**
+     * Configures table columns and cell factories.
+     */
     private void configureTableColumns() {
         tasksTable.setEditable(true);
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
@@ -71,13 +81,16 @@ public class TasksView implements Initializable {
         scheduledDate.setCellValueFactory(new PropertyValueFactory<>("scheduledDate"));
         parentProject.setCellValueFactory(cellData -> {
             Project p = cellData.getValue().getParentProject();
-            return new SimpleStringProperty(p != null ? p.getName() : "Task Libera");
+            return new SimpleStringProperty(p != null ? p.getName() : "Unassigned Task");
         });
         setupEffectiveTimeColumn();
         setupStatusColumn();
         setupDeleteColumn();
     }
 
+    /**
+     * Configures the effective time column with inline editing.
+     */
     private void setupEffectiveTimeColumn() {
         effectiveTime.setCellValueFactory(new PropertyValueFactory<>("effectiveTime"));
         effectiveTime.setCellFactory(column -> new TextFieldTableCell<>(new DoubleStringConverter()) {
@@ -86,7 +99,6 @@ public class TasksView implements Initializable {
                 super.updateItem(item, empty);
                 if (!empty && getTableRow() != null && getTableRow().getItem() != null) {
                     Task task = getTableRow().getItem();
-                    // Impedisce l'editing visivo se la task non è completata
                     setEditable(task.isCompleted());
                     setStyle(task.isCompleted() ? "-fx-opacity: 1;" : "-fx-opacity: 0.5;");
                     setStyle(getStyle() + "-fx-alignment: CENTER;");
@@ -97,82 +109,46 @@ public class TasksView implements Initializable {
         effectiveTime.setOnEditCommit(event -> {
             Task task = event.getRowValue();
             if (task != null && task.isCompleted()) {
-                // Delega l'aggiornamento e il salvataggio combinato (Task + Progetto) al Facade
                 jTimeManager.updateTaskEffectiveTime(task, event.getNewValue());
-                showStatus("Tempo aggiornato.", false);
+                showStatus("Time updated.", false);
             } else {
                 refreshTable();
-                showStatus("Completa la task prima di inserire le ore!", true);
+                showStatus("Complete the task before adding hours!", true);
             }
         });
     }
 
+    /**
+     * Sets up the status column with interactive checkboxes.
+     */
     private void setupStatusColumn() {
-        statusColumn.setText("Stato");
-        statusColumn.setMinWidth(90);
-        statusColumn.setResizable(false);
-        statusColumn.setCellFactory(param -> new TableCell<>() {
-            private final CheckBox checkBox = new CheckBox();
-            {
-                setStyle("-fx-alignment: CENTER;");
-                checkBox.setOnAction(event -> {
-                    Task task = getTableRow().getItem();
-                    if (task != null) {
-                        // JTimeManager si occuperà di resettare le ore se la spunta viene tolta
-                        jTimeManager.updateTaskStatus(task, checkBox.isSelected());
-                        refreshTable();
-                        showStatus("Stato aggiornato.", false);
-                    }
-                });
-            }
-            @Override
-            protected void updateItem(Boolean item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || getTableRow() == null || getTableRow().getItem() == null) {
-                    setGraphic(null);
-                } else {
-                    checkBox.setSelected(getTableRow().getItem().isCompleted());
-                    setGraphic(checkBox);
-                }
-            }
-        });
+        statusColumn.setCellFactory(param -> new StatusCell());
     }
 
+    /**
+     * Sets up the delete column with custom buttons.
+     */
     private void setupDeleteColumn() {
-        deleteColumn.setMinWidth(80);
-        deleteColumn.setResizable(false);
-        deleteColumn.setCellFactory(param -> new TableCell<>() {
-            private final Button btnDelete = new Button("🗑");
-            {
-                btnDelete.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-cursor: hand;");
-                btnDelete.setOnAction(event -> {
-                    jTimeManager.removeTaskPermanently(getTableRow().getItem());
-                    refreshTable();
-                    showStatus("Task eliminata.", false);
-                });
-            }
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                setGraphic(empty ? null : btnDelete);
-                setStyle("-fx-alignment: CENTER;");
-            }
-        });
+        deleteColumn.setCellFactory(param -> new DeleteTaskCell());
     }
 
+    /**
+     * Configures the initial UI state and project selectors.
+     */
     private void setupInitialState() {
         dueDatePicker.setValue(LocalDate.now());
         setupComboBoxes();
     }
 
+    /**
+     * Populates project-related combo boxes.
+     */
     private void setupComboBoxes() {
-        // Chiediamo i progetti al Facade, non al sottomanager
         List<Project> allProjects = jTimeManager.getAllProjects();
-
         projectComboBox.setItems(FXCollections.observableArrayList(allProjects));
 
         projectFilter.getItems().clear();
-        projectFilter.getItems().add("Tutti");
+        projectFilter.getItems().add("All");
         projectFilter.getItems().addAll(allProjects.stream()
                 .map(Project::getName)
                 .collect(Collectors.toList()));
@@ -182,35 +158,42 @@ public class TasksView implements Initializable {
         }
     }
 
+    /**
+     * Handles the creation of a new task.
+     */
     @FXML
     private void handleAddTask() {
         try {
             if (!validateInput()) return;
-
             Task newTask = new SimpleTask(taskNameField.getText().trim(),
                     Double.parseDouble(durationField.getText().replace(",", ".")));
             newTask.setScheduledDate(dueDatePicker.getValue());
-
             jTimeManager.addNewTaskToProject(projectComboBox.getValue(), newTask);
-
             handleClearForm();
-            showStatus("Task salvata!", false);
+            showStatus("Task saved!", false);
             refreshTable();
         } catch (NumberFormatException e) {
-            showStatus("Errore: Durata non valida.", true);
+            showStatus("Error: Invalid duration.", true);
         } catch (Exception e) {
-            showStatus("Errore durante il salvataggio.", true);
+            showStatus("Error during save operation.", true);
         }
     }
 
-     private boolean validateInput() {
+    /**
+     * Validates that the task input fields are correctly filled.
+     * @return true if valid, false otherwise.
+     */
+    private boolean validateInput() {
         if (taskNameField.getText().trim().isEmpty() || durationField.getText().trim().isEmpty() || dueDatePicker.getValue() == null) {
-            showStatus("Errore: Campi obbligatori mancanti.", true);
+            showStatus("Error: Required fields missing.", true);
             return false;
         }
         return true;
     }
 
+    /**
+     * Clears the task input form.
+     */
     @FXML
     private void handleClearForm() {
         taskNameField.clear();
@@ -219,16 +202,18 @@ public class TasksView implements Initializable {
         projectComboBox.getSelectionModel().clearSelection();
     }
 
+    /**
+     * Filters the tasks table based on project and date range.
+     */
     @FXML
     private void applyFilters() {
         List<Task> allTasks = jTimeManager.getAllSyncedTasks();
-
         String filterProject = projectFilter.getValue();
         LocalDate start = startDatePicker.getValue();
         LocalDate end = endDatePicker.getValue();
 
         List<Task> filtered = allTasks.stream()
-                .filter(t -> filterProject == null || filterProject.equals("Tutti") ||
+                .filter(t -> filterProject == null || filterProject.equals("All") ||
                         (t.getParentProject() != null && t.getParentProject().getName().equals(filterProject)))
                 .filter(t -> {
                     LocalDate d = t.getScheduledDate();
@@ -239,10 +224,9 @@ public class TasksView implements Initializable {
 
         tasksTable.setItems(FXCollections.observableArrayList(filtered));
     }
+
     /**
-     * Ripristina i filtri di ricerca allo stato iniziale.
-     * Svuota i campi di testo, resetta le selezioni dei filtri
-     * e ricarica l'elenco completo dei dati nella tabella.
+     * Resets filters and reloads the full task list.
      */
     @FXML private void resetFilters() {
         startDatePicker.setValue(null);
@@ -252,14 +236,18 @@ public class TasksView implements Initializable {
     }
 
     /**
-     * Aggiorna i menu a tendina dei progetti e ricarica i dati della tabella
-     * applicando i filtri correnti.
+     * Synchronizes projects and refreshes the task table.
      */
     private void refreshTable() {
         setupComboBoxes();
         applyFilters();
     }
 
+    /**
+     * Displays a temporary status message to the user.
+     * @param msg     The message text.
+     * @param isError True if the message is an error.
+     */
     private void showStatus(String msg, boolean isError) {
         messageLabel.setText(msg);
         messageLabel.setStyle(isError ? "-fx-text-fill: #e74c3c;" : "-fx-text-fill: #27ae60;");
@@ -268,10 +256,78 @@ public class TasksView implements Initializable {
         pause.play();
     }
 
+    /**
+     * Navigates back to the main view.
+     * @param event The action event.
+     */
     @FXML
-    public void goToMainView(ActionEvent event) throws IOException {
-        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/MainView.fxml")));
-        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        stage.setScene(new Scene(root));
+    public void goToMainView(ActionEvent event) {
+        try {
+            Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/MainView.fxml")));
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Specialized cell for task status management using a CheckBox.
+     */
+    private class StatusCell extends TableCell<Task, Boolean> {
+        private final CheckBox checkBox = new CheckBox();
+
+        public StatusCell() {
+            setStyle("-fx-alignment: CENTER;");
+            checkBox.setOnAction(event -> {
+                Task task = getTableRow().getItem();
+                if (task != null) {
+                    jTimeManager.updateTaskStatus(task, checkBox.isSelected());
+                    refreshTable();
+                    showStatus("Status updated.", false);
+                }
+            });
+        }
+
+        @Override
+        protected void updateItem(Boolean item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty || getTableRow() == null || getTableRow().getItem() == null) {
+                setGraphic(null);
+            } else {
+                checkBox.setSelected(getTableRow().getItem().isCompleted());
+                setGraphic(checkBox);
+            }
+        }
+    }
+
+    /**
+     * Specialized cell for task deletion using a Button.
+     */
+    private class DeleteTaskCell extends TableCell<Task, Void> {
+        private final Button btnDelete = new Button("🗑");
+
+        public DeleteTaskCell() {
+            btnDelete.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-cursor: hand;");
+            btnDelete.setOnAction(event -> {
+                Task task = getTableRow().getItem();
+                if (task != null) {
+                    jTimeManager.removeTaskPermanently(task);
+                    refreshTable();
+                    showStatus("Task deleted.", false);
+                }
+            });
+        }
+
+        @Override
+        protected void updateItem(Void item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty || getTableRow() == null || getTableRow().getItem() == null) {
+                setGraphic(null);
+            } else {
+                setGraphic(btnDelete);
+                setStyle("-fx-alignment: CENTER;");
+            }
+        }
     }
 }

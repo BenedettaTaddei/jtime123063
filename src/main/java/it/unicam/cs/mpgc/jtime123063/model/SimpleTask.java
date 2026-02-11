@@ -4,6 +4,10 @@ import java.time.LocalDate;
 import java.util.UUID;
 import java.util.Objects;
 
+/**
+ * Standard implementation of the Task interface.
+ * Provides basic functionality for tracking task progress, timing, and project association.
+ */
 public class SimpleTask implements Task {
 
     private final String id;
@@ -15,7 +19,10 @@ public class SimpleTask implements Task {
     private LocalDate scheduledDate;
 
     /**
-     * Costruttore per nuovi task.
+     * Constructor for creating new tasks with a generated unique ID.
+     * * @param title         The title of the task.
+     * @param estimatedTime The estimated duration in hours.
+     * @throws IllegalArgumentException if title is null/empty or estimatedTime is negative.
      */
     public SimpleTask(String title, double estimatedTime) {
         if (title == null || title.trim().isEmpty()) {
@@ -33,7 +40,14 @@ public class SimpleTask implements Task {
     }
 
     /**
-     * Costruttore usato dal Parser XML per ricostruire task esistenti.
+     * Constructor used by the XML Parser to reconstruct existing tasks.
+     * * @param id            The unique identifier of the task.
+     * @param title         The title of the task.
+     * @param estimatedTime The estimated duration in hours.
+     * @param effectiveTime The actual time spent in hours.
+     * @param completed     The completion status of the task.
+     * @param date          The scheduled execution date.
+     * @throws IllegalArgumentException if parameters are invalid (null IDs, negative times, etc.).
      */
     public SimpleTask(String id, String title, double estimatedTime,
                       double effectiveTime, boolean completed, LocalDate date) {
