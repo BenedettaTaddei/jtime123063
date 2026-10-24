@@ -33,13 +33,15 @@ Java 21, JavaFX, Gradle, XML
 
 ## Getting started
 
-Requirements: JDK 21 and Gradle.
+Requirements: JDK 21 (Gradle is included through the wrapper).
 
 ```bash
 git clone https://github.com/BenedettaTaddei/jtime123063.git
 cd jtime123063
-gradle run
+./gradlew run
 ```
+
+On Windows, use `gradlew.bat run`.
 
 ## Author
 
