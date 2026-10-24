@@ -19,7 +19,7 @@ The application follows a layered design, with each component having a single re
 - **Managers**: `ProjectManager`, `TaskManager` and `ReportManager` hold the business rules, while `JTimeManager` coordinates them and keeps tasks and projects consistent after loading
 - **Controller / View**: `MainView`, `TasksView`, `ProjectsView` and `ReportsView` handle user interaction and delegate the logic to the managers
 
-Data is stored in a single XML file with two sections (`tasks_store` and `projects_store`).
+Data is stored in a single XML file (`data/jtime.xml`) with two sections (`tasks_store` and `projects_store`), so the state of the application is kept between sessions.
 
 ## Extensibility
 
