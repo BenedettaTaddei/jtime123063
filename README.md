@@ -1,6 +1,6 @@
 # JTime
 
-A Java application for managing tasks and projects, tracking estimated versus actual time and analysing productivity through reports. Developed as a university project for the *Metodologie di Programmazione* (Programming Methodologies) course at the University of Camerino.
+A Java application for managing tasks and projects, tracking estimated versus actual time and analysing productivity through reports. Developed as a university project for the *Programming Methodologies* course at the University of Camerino.
 
 ## Features
 
